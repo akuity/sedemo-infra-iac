@@ -8,8 +8,8 @@ The repo is intended to represent that area of responsbility typically owned by 
 
 - Provision Core Network
 - Provision Domains
-- Provision Argo/Kargo k8s cluster (optional, default us Akuity hosted)
 - Provision Runtime K8s cluster(s)
+- Provision Argo/Kargo k8s cluster (optional, default us Akuity hosted)
 - Bootstrap Akuity 
  - ArgoCD App-of-Apps
 
@@ -39,7 +39,8 @@ export TF_VAR_argo_admin_password="SOME VALUE HERE"
 
 ## TODO
 
-- [ ] Apply app-of-apps
+- [ ] CI Integration 
+- [x] Apply app-of-apps
 - [ ] Configure OIDC for argo
 - [ ]  ... kargo
 - [ ] provision demo k8s cluster in AWS EKS

@@ -1,5 +1,11 @@
 
 
+
+
+
+
+
+
 # Our app of apps that bootstraps the Platform team's setup.
 resource "argocd_application" "app-of-apps" {
   metadata {
@@ -10,14 +16,22 @@ resource "argocd_application" "app-of-apps" {
 
   spec {
     destination {
-      name=       var.destination_cluster_name
+      name = "in-cluster"
     }
 
     source {
-      repo_url        =  var.source_repo_url
-      path            = var.source_directory_path
+      repo_url = var.source_repo_url
+      path     = var.source_directory_path
       directory {
         recurse = var.source_directory_recursive
+      }
+    }
+
+    sync_policy {
+      automated {
+        prune = true
+        self_heal = true
+        
       }
     }
   }

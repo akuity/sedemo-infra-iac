@@ -1,5 +1,4 @@
 
-
 # create or update an AKP (ArgoCD) instance.
 resource "akp_instance" "se-demo-iac" {
   name = var.akp_instance_name
@@ -48,6 +47,24 @@ resource "akp_kargo_agent" "kargo-agent" {
       size = var.kargo_agent_size
       akuity_managed = true
       remote_argocd = akp_instance.se-demo-iac.id # pulled from resource above
+    }
+  }
+}
+
+
+# Register local cluster with ArgoCD
+resource "akp_cluster" "local-cluster" {
+  instance_id = akp_instance.se-demo-iac.id
+  kube_config = {
+    config_context = "orbstack"
+    config_path    = "~/.kube/config"
+  }
+  #TODO: this shoudl be provisioned EKS cluster
+  name      = var.iac_cluster_name
+  namespace = "akuity"
+  spec = {
+    data = {
+      size = "small"
     }
   }
 }

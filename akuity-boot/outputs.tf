@@ -20,3 +20,8 @@ output "argo_admin_password" {
   value       = var.argo_admin_password
   sensitive   = true
 }
+
+output "iac_cluster_name" {
+  description = "The name of the local cluster registered with ArgoCD."
+  value       = var.iac_cluster_name
+}

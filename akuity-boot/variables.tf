@@ -50,3 +50,8 @@ variable "argo_admin_password" {
   type        = string
   sensitive   = true
   }
+
+variable "iac_cluster_name" {
+  description = "The name of the local cluster to register with ArgoCD."
+  type        = string
+}

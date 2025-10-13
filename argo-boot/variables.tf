@@ -12,7 +12,7 @@ variable "source_repo_target_revision" {
   description = "The git revision (branch, tag, commit) of the repo containing the app-of-apps."
   type        = string
   default     = "HEAD"
-  
+
 }
 
 variable "source_directory_recursive" {
@@ -25,5 +25,5 @@ variable "source_directory_path" {
   description = "The path within the git repo to the app-of-apps."
   type        = string
   default     = "apps"
-  
+
 }
