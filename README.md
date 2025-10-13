@@ -21,9 +21,16 @@ This repo uses terraform modules that can be applied with Hashicorp or OpenTofu 
 
 ## Prereqs
 
-- `AKUITY_API_KEY_ID` envar, from Akuity org.
-- `AKUITY_API_KEY_SECRET` 
-- `AKUITY_SERVER_URL` if using self-hosted
+The TF modules need some credentials, and is easiest done with a local `.env` file (which will be ignored by git)
+
+```
+export AKUITY_API_KEY_ID=<FROM AKUITY ORG>
+export AKUITY_API_KEY_SECRET=<FROM AKUITY ORG>
+export AKUITY_SERVER_URL=https://akuity.cloud
+
+# This can be any value you want, as we are pushing it.
+export TF_VAR_argo_admin_password="SOME VALUE HERE"
+```
 
 
 ## Running
