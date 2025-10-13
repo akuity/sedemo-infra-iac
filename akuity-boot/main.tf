@@ -16,7 +16,7 @@ resource "akp_instance" "se-demo-iac" {
     # Set password for `admin` user.
   argocd_secret = {
     "admin.password" = bcrypt(var.argo_admin_password)    
-  }
+  }  
 }
 
 # create or update a Kargo instance.
@@ -65,6 +65,39 @@ resource "akp_cluster" "local-cluster" {
   spec = {
     data = {
       size = "small"
+    }
+  }
+}
+
+
+
+# Our app of apps that bootstraps the Platform team's setup.
+resource "argocd_application" "app-of-apps" {
+  metadata {
+    name      = "app-of-apps"
+    namespace = "argocd"
+
+  }
+
+  spec {
+    destination {
+      name = "in-cluster"
+    }
+
+    source {
+      repo_url = var.source_repo_url
+      path     = var.source_directory_path
+      directory {
+        recurse = var.source_directory_recursive
+      }
+    }
+
+    sync_policy {
+      automated {
+        prune = true
+        self_heal = true
+        
+      }
     }
   }
 }
