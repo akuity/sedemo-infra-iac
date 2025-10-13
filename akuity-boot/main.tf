@@ -28,6 +28,13 @@ resource "akp_kargo_instance" "kargo-instance" {
       kargo_instance_spec = {}
     }
   }
+  kargo_cm = {
+    adminAccountEnabled  = "true"
+    adminAccountTokenTtl = "24h"
+  }
+  kargo_secret = {
+    adminAccountPasswordHash = bcrypt(var.argo_admin_password)
+  }
 }
 
 
@@ -69,6 +76,22 @@ resource "akp_cluster" "local-cluster" {
   }
 }
 
+resource "akp_cluster" "kargo-cluster" {
+  instance_id = akp_instance.se-demo-iac.id
+
+  #TODO: this shoudl be provisioned EKS cluster
+  name      = "kargo"
+  namespace = "akuity"
+  spec = {
+    data = {
+      direct_cluster_spec = {
+        kargo_instance_id = akp_kargo_instance.kargo-instance.id
+        cluster_type              = "kargo"
+      }
+      size = "small"
+    }
+  }
+}
 
 
 # Our app of apps that bootstraps the Platform team's setup.
