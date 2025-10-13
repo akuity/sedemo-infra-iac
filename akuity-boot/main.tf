@@ -25,7 +25,9 @@ resource "akp_kargo_instance" "kargo-instance" {
   kargo = {
     spec = {
       version             = var.kargo_instance_version
-      kargo_instance_spec = {}
+      kargo_instance_spec = {
+        default_shard_agent = var.kargo_agent_name
+      }
     }
   }
   kargo_cm = {
@@ -35,6 +37,7 @@ resource "akp_kargo_instance" "kargo-instance" {
   kargo_secret = {
     adminAccountPasswordHash = bcrypt(var.argo_admin_password)
   }
+  #TODO: add creds to ta;k to AWS secret manager
 }
 
 
