@@ -7,7 +7,7 @@ variable "org_name" {
   description = "The name of the Akuity organization."
   type        = string
   default     = "demo"
-}   
+}
 
 variable "akp_instance_name" {
   description = "The name of the AKP instance to create or update."
@@ -25,7 +25,7 @@ variable "kargo_instance_name" {
   description = "The name of the Kargo instance to create or update."
   type        = string
   default     = "se-demo-iac-kargo"
-}   
+}
 
 variable "kargo_instance_version" {
   description = "The version of the Kargo instance to create or update."
@@ -49,7 +49,7 @@ variable "argo_admin_password" {
   description = "The password for the ArgoCD admin user."
   type        = string
   sensitive   = true
-  }
+}
 
 variable "iac_cluster_name" {
   description = "The name of the local cluster to register with ArgoCD."

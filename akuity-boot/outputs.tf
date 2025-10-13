@@ -1,18 +1,18 @@
 output "argo_server_url" {
   description = "The URL of the ArgoCD server"
   # TODO: must be someway to get root domain and not assume akuity.cloud
-  value       = "${akp_instance.se-demo-iac.argocd.spec.instance_spec.subdomain}.cd.akuity.cloud"
+  value = "${akp_instance.se-demo-iac.argocd.spec.instance_spec.subdomain}.cd.akuity.cloud"
 }
 
 output "kargo_instance_id" {
   description = "The ID of the Kargo instance"
   value       = akp_kargo_instance.kargo-instance.id
-}   
+}
 
 output "argo_instance_id" {
   description = "The ID of the ArgoCD instance"
-  value       = akp_instance.se-demo-iac.id 
-  
+  value       = akp_instance.se-demo-iac.id
+
 }
 
 output "argo_admin_password" {

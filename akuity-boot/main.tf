@@ -13,10 +13,10 @@ resource "akp_instance" "se-demo-iac" {
   argocd_cm = {
     "accounts.admin" = "login"
   }
-    # Set password for `admin` user.
+  # Set password for `admin` user.
   argocd_secret = {
-    "admin.password" = bcrypt(var.argo_admin_password)    
-  }  
+    "admin.password" = bcrypt(var.argo_admin_password)
+  }
 }
 
 # create or update a Kargo instance.
@@ -44,9 +44,9 @@ resource "akp_kargo_agent" "kargo-agent" {
   spec = {
     description = "iac managed kargo agent for SE Team demos"
     data = {
-      size = var.kargo_agent_size
+      size           = var.kargo_agent_size
       akuity_managed = true
-      remote_argocd = akp_instance.se-demo-iac.id # pulled from resource above
+      remote_argocd  = akp_instance.se-demo-iac.id # pulled from resource above
     }
   }
 }
@@ -94,9 +94,9 @@ resource "argocd_application" "app-of-apps" {
 
     sync_policy {
       automated {
-        prune = true
+        prune     = true
         self_heal = true
-        
+
       }
     }
   }
