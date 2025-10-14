@@ -21,3 +21,9 @@ provider "argocd" {
   username    = "admin"
   password    = var.argo_admin_password
 }
+
+provider "helm" {
+  kubernetes = {
+    config_path = "~/.kube/config"
+  }
+}

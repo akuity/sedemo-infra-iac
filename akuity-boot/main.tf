@@ -24,9 +24,10 @@ resource "akp_kargo_instance" "kargo-instance" {
   name = var.kargo_instance_name
   kargo = {
     spec = {
-      version             = var.kargo_instance_version
+      version = var.kargo_instance_version
       kargo_instance_spec = {
-        default_shard_agent = var.kargo_agent_name
+        # This causes provisioning to hang and page eng. team :(
+        #  default_shard_agent = var.kargo_agent_name
       }
     }
   }
@@ -89,7 +90,7 @@ resource "akp_cluster" "kargo-cluster" {
     data = {
       direct_cluster_spec = {
         kargo_instance_id = akp_kargo_instance.kargo-instance.id
-        cluster_type              = "kargo"
+        cluster_type      = "kargo"
       }
       size = "small"
     }
