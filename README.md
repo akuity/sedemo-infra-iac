@@ -45,3 +45,14 @@ export TF_VAR_argo_admin_password="SOME VALUE HERE"
 - [ ]  ... kargo
 - [ ] provision demo k8s cluster in AWS EKS
 - [ ] Demo domainname
+
+
+## Secrets
+- AWS secrets manager
+- External Secrets operator in kargo cluster via Argo
+- K8s Secrets in Kargo cluster
+- kargo warehouse/stages uses k8s secret
+
+
+## Stories To cover
+- Pain of setting up credentials and RBAC

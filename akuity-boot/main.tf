@@ -26,8 +26,6 @@ resource "akp_kargo_instance" "kargo-instance" {
     spec = {
       version = var.kargo_instance_version
       kargo_instance_spec = {
-        # This causes provisioning to hang and page eng. team :(
-        #  default_shard_agent = var.kargo_agent_name
       }
     }
   }
@@ -39,6 +37,7 @@ resource "akp_kargo_instance" "kargo-instance" {
     adminAccountPasswordHash = bcrypt(var.argo_admin_password)
   }
   #TODO: add creds to ta;k to AWS secret manager
+  depends_on = [ akp_instance.se-demo-iac ]
 }
 
 
