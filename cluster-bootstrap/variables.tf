@@ -30,7 +30,7 @@ variable "kargo_instance_name" {
 variable "kargo_instance_version" {
   description = "The version of the Kargo instance to create or update."
   type        = string
-  default     = "v1.7.5-ak.0"
+  default     = "v1.8.0-ak.0"
 }
 variable "kargo_agent_name" {
   description = "The name of the Kargo agent to create or update."

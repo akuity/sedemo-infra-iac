@@ -5,13 +5,6 @@ resource "helm_release" "nginx_ingress" {
   create_namespace = true
   namespace        = "ingress-nginx"
   values = [
-    file("${path.module}/../nginx-helm/values.yaml")
+    file("${path.module}/nginx-helm/values.yaml")
   ]
-
-    set = [
-      {
-        name  = "controller.service.externalTrafficPolicy"
-        value = "Local"
-      }
-    ]
 }

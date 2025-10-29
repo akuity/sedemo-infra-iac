@@ -5,7 +5,10 @@ resource "akp_instance" "se-demo-iac" {
   argocd = {
     "spec" = {
       "instance_spec" = {
-        "declarative_management_enabled" = true
+        declarative_management_enabled = true
+        application_set_extension = {
+          enabled = true
+        }
       }
       "version" = var.akp_instance_version
     }
@@ -25,7 +28,15 @@ resource "akp_kargo_instance" "kargo-instance" {
   kargo = {
     spec = {
       version = var.kargo_instance_version
+
       kargo_instance_spec = {
+        gc_config = {
+          max_retained_freight       = 20
+          max_retained_promotions    = 20
+          min_freight_deletion_age   = 1209600
+          min_promotion_deletion_age = 1209600
+        }
+
       }
     }
   }
@@ -37,7 +48,7 @@ resource "akp_kargo_instance" "kargo-instance" {
     adminAccountPasswordHash = bcrypt(var.argo_admin_password)
   }
   #TODO: add creds to ta;k to AWS secret manager
-  depends_on = [ akp_instance.se-demo-iac ]
+  depends_on = [akp_instance.se-demo-iac]
 }
 
 
@@ -102,7 +113,9 @@ resource "argocd_application" "app-of-apps" {
   metadata {
     name      = "app-of-apps"
     namespace = "argocd"
-
+    labels = {
+      cluster = "in-cluster"
+    }
   }
 
   spec {
@@ -118,12 +131,14 @@ resource "argocd_application" "app-of-apps" {
       }
     }
 
-    sync_policy {
-      automated {
-        prune     = true
-        self_heal = true
+    # sync_policy {
+    #   automated {
+    #     prune     = true
+    #     self_heal = true
 
-      }
-    }
+    #   }
+    # }
   }
 }
+
+

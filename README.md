@@ -39,6 +39,7 @@ export TF_VAR_argo_admin_password="SOME VALUE HERE"
 
 ## TODO
 
+
 - [ ] CI Integration 
 - [x] Apply app-of-apps
 - [ ] Configure OIDC for argo
