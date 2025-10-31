@@ -1,7 +1,9 @@
 name: AWS IAC
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
-# Need ID token write permission to use OIDC
+defaults:
+  run:
+    working-directory: core-env/aws
 permissions:
   id-token: write
 jobs:
@@ -21,4 +23,4 @@ jobs:
         uses: opentofu/setup-opentofu@v1
       - run: tofu init
       - id: plan
-        run: tofu plan -no-color
+        run: tofu plan -no-color -var-file=default.tfvars
