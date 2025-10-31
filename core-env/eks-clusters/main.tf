@@ -165,3 +165,45 @@ resource "kubernetes_storage_class" "expandable" {
   depends_on = [module.eks]
 }
 
+# Expose the cluster to internet via custom domain
+
+import {
+    to= aws_route53_zone.demo_domain
+    id="Z01905343OT8D9ZSW46CJ"
+}
+
+resource "aws_route53_zone" "demo_domain" {
+  name    = var.root_domain_name
+  comment = "Please contact eddie.webbinaro@akuity.io with questions"
+  tags = {
+    "Owner" = var.common_tags.owner
+  }
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "helm_release" "nginx_ingress" {
+  name             = "ingress-nginx"
+  repository       = "https://kubernetes.github.io/ingress-nginx"
+  chart            = "ingress-nginx"
+  create_namespace = true
+  namespace        = "ingress-nginx"
+  values = [
+    file("${path.module}/nginx-helm/values.yaml")
+  ]
+}
+
+resource "aws_route53_record" "records" {
+  for_each = toset([
+    "*."
+  ])
+
+  zone_id = aws_route53_zone.demo_domain.id
+  name    = each.key
+  type    = "CNAME"
+  ttl     = 5
+
+  records    = [data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname]
+  depends_on = [helm_release.nginx_ingress]
+}

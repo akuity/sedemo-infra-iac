@@ -22,3 +22,11 @@ variable "primary_cluser_node_count" {
 variable "primary_cluser_node_type" {
   default = "t4g.large" #ARM Graviton processors (T4) offer burstable price effective performance.
 }
+
+variable "root_domain_name" {
+    default = "demoapps.akuity.io"
+}
+
+variable "ingress_namespace"{
+    default = "ingress-nginx"
+}

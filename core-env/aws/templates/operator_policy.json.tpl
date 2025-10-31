@@ -20,6 +20,7 @@
                 "ec2:DescribeLaunchTemplates",
                 "ec2:DescribeLaunchTemplateVersions",
                 "ec2:DescribeNatGateways",
+                "ec2:DescribeNetworkAcls",
                 "ec2:DescribeNetworkInterfaces",
                 "ec2:DescribeRegions",
                 "ec2:DescribeRouteTables",

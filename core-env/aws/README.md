@@ -57,3 +57,17 @@ If you need to run elevated SSO commands, use the pipeline profile
 `aws [COMMAND] --profile pipeline`
 OR
 `AWS_PROFILE=pipeline tofu [COMMAND]`
+
+
+## Verify my role
+
+The easiest way to verify that you are in right role is with `aws sts get-caller-identity`, and look at the returned `arn` to either contain `AdminstratorAccess`, `sedemo-iac-pipeline-role`, or `sedemo-iac-operator-role`
+
+
+```
+{
+    "UserId": "XXXXX",
+    "Account": "XXXXXXX",
+    "Arn": "arn:aws:sts::XXXXX:assumed-role/AWSReservedSSO_AdministratorAccess_e2e980dbad09a8b6/eddie.webbinaro@akuity.io"
+}
+```
