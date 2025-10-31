@@ -10,7 +10,7 @@ terraform {
   backend "s3" {
     bucket       = "arad-tf-state-files"
     region       = "us-west-2"
-    key          = "se-team-aws-setup/terraform.tfstate"
+    key          = "se-team-primary-cluster/terraform.tfstate"
     use_lockfile = true
   }
 }

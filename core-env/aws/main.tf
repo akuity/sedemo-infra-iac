@@ -102,3 +102,10 @@ resource "aws_iam_role_policy_attachment" "gha_attachment" {
   role       = aws_iam_role.demo_gha_role.name
   policy_arn = aws_iam_policy.demo_gha_policy.arn
 }
+
+output "demo_operator_role_arn" {
+  value = aws_iam_role.demo_role.arn
+}
+output "demo_pipeline_role_arn" {
+  value = aws_iam_role.demo_gha_role.arn
+}

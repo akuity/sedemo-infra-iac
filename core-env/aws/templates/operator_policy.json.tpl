@@ -48,7 +48,8 @@
                 "logs:ListTagsLogGroup",
                 "logs:ListTagsForResource",
                 "s3:GetObject",
-                "s3:ListBucket"
+                "s3:ListBucket",
+                "ssm:GetParameter"
             ],
             "Resource": "*"
         }
