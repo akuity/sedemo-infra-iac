@@ -1,0 +1,19 @@
+name: AWS IAC
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+on: [push]
+# Need ID token write permission to use OIDC
+permissions:
+  id-token: write
+jobs:
+  run_job_with_aws:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@main # Or a specific version
+        with:
+          role-to-assume: arn:aws:iam::218691292270:role/sedemo-iac-pipeline-role
+          aws-region: us-west-2
+      - name: Additional steps
+        run: |
+          # Your commands that require AWS credentials
+          aws sts get-caller-identity 
