@@ -2,18 +2,32 @@
 
 ## Setup user access via SSO
 
-This terraform module uses a custom role (var.assumed_role) with specific permissions. Only those with access to assigned IT role (var.iam_sso_role) may access it.
+This terraform creates 2 roles with specific permissions. 
 
-To assume this role locally, you may setup an AWS config file `~/.aws/config` like such.
+- `sedemo-operator-role` (var.limited_assumed_role) 
+  Grants limited, read-only permissions, Only those with access to assigned IT role (var.iam_sso_role) may access it.
+- `sedemo-pipeline-role` (var.limited_priveledged_role) 
+  Grants elevated, read-write permissions, intended for use by GHA piplines via OIDC, but may be accessed by team if needed.
+
+To assume these roles, or the IT provided admin role locally, you may setup an AWS config file `~/.aws/config` like such.
 
 ```
 [default]
+# This is the operator read-only role
 source_profile=admin
-role_arn=arn:aws:iam::218691292270:role/iac-pipeline-role
-role_session_name=eddie. # use your name here..
+role_arn=arn:aws:iam::218691292270:role/sedemo-iac-operator-role
+role_session_name=eddie
+region=us-west-2
+
+[profile pipeline]
+# Elevated write access
+source_profile=admin
+role_arn=arn:aws:iam::218691292270:role/sedemo-iac-pipeline-role
+role_session_name=eddie
 region=us-west-2
 
 [profile admin]
+# Full admin
 region=us-west-2
 output=json
 sso_account_id=218691292270
@@ -21,6 +35,7 @@ sso_role_name=AdministratorAccess
 sso_session=sso
 
 [sso-session sso]
+# This instructs AWS how to use our SSO provider
 sso_start_url = https://akuity.awsapps.com/start/#
 sso_region = us-east-2
 sso_registration_scopes = sso:account:access
@@ -35,10 +50,10 @@ sso_registration_scopes = sso:account:access
 Running AWS commands will use the custom, limited role as default
 
 
-### Adminstrator (Break the glass)
+### Elevated (Break the glass)
 
-If you need to run elevated SSO commands, use the admin profile
+If you need to run elevated SSO commands, use the pipeline profile
 
-`aws [COMMAND] --profile admin`
+`aws [COMMAND] --profile pipeline`
 OR
-`AWS_PROFILE=admin tofu [COMMAND]`
+`AWS_PROFILE=pipeline tofu [COMMAND]`

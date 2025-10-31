@@ -16,8 +16,8 @@ variable "common_tags" {
 
 variable "demo_domain" {
   description = "Domain apps will be exposed via ingress"
-  type = string
-  default = "demoapps.akuity.io"
+  type        = string
+  default     = "demoapps.akuity.io"
 }
 
 variable "email_usernames" {
@@ -26,10 +26,15 @@ variable "email_usernames" {
 
 variable "sso_iam_role" {
   description = "Name of AWS IAM SSO role to be used for EKS auth by SE team. Assigned by IT"
-  default = "AWSReservedSSO_AdministratorAccess_e2e980dbad09a8b6" 
+  default     = "AWSReservedSSO_AdministratorAccess_e2e980dbad09a8b6"
 }
 
-variable "iac_assumed_role" {
-    default = "iac-pipeline-role"
-    description = "Custom role created by SE team, assumable to anyone in above role."
+variable "limited_assumed_role" {
+  default     = "sedemo-iac-operator-role"
+  description = "Custom role created by SE team, assumable to anyone in above role, mostly a read-only role."
+}
+
+variable "priviledged_assumed_role" {
+  default     = "sedemo-iac-pipeline-role"
+  description = "Custom role created by SE team, primary used by GHA pipelines, can be used by team if needed."
 }
