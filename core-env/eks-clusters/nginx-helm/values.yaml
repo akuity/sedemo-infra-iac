@@ -452,6 +452,16 @@ controller:
       labels: {}
     # -- Annotations to be added to the external controller service. See `controller.service.internal.annotations` for annotations to be added to the internal controller service.
     annotations: {}
+    # from AWS docs suggests we should add following to annotations
+    # https://aws.amazon.com/blogs/containers/exposing-kubernetes-applications-part-3-nginx-ingress-controller/
+      # service.beta.kubernetes.io/aws-load-balancer-name: apps-ingress
+      # service.beta.kubernetes.io/aws-load-balancer-type: external
+      # service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+      # service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+      # service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: http
+      # service.beta.kubernetes.io/aws-load-balancer-healthcheck-path: /healthz
+      # service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: 10254
+
     # -- Labels to be added to both controller services.
     labels: {}
     # -- Type of the external controller service.

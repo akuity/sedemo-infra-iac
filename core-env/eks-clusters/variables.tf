@@ -13,20 +13,20 @@ variable "common_tags" {
 }
 
 variable "primary_cluster_name" {
-  default = "sedemo-primary-vpc"
+  default = "sedemo-primary"
 }
 
 variable "primary_cluser_node_count" {
   default = "2"
 }
 variable "primary_cluser_node_type" {
-  default = "t4g.large" #ARM Graviton processors (T4) offer burstable price effective performance.
+  default = "t3.large"
 }
 
 variable "root_domain_name" {
-    default = "demoapps.akuity.io"
+  default = "demoapps.akuity.io"
 }
 
-variable "ingress_namespace"{
-    default = "ingress-nginx"
+variable "ingress_namespace" {
+  default = "ingress-nginx"
 }

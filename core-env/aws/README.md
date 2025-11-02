@@ -13,21 +13,20 @@ To assume these roles, or the IT provided admin role locally, you may setup an A
 
 ```
 [default]
-# This is the operator read-only role
 source_profile=admin
 role_arn=arn:aws:iam::218691292270:role/sedemo-iac-operator-role
 role_session_name=eddie
 region=us-west-2
+sso_session=sso
 
 [profile pipeline]
-# Elevated write access
 source_profile=admin
 role_arn=arn:aws:iam::218691292270:role/sedemo-iac-pipeline-role
 role_session_name=eddie
 region=us-west-2
+sso_session=sso
 
 [profile admin]
-# Full admin
 region=us-west-2
 output=json
 sso_account_id=218691292270
@@ -35,7 +34,6 @@ sso_role_name=AdministratorAccess
 sso_session=sso
 
 [sso-session sso]
-# This instructs AWS how to use our SSO provider
 sso_start_url = https://akuity.awsapps.com/start/#
 sso_region = us-east-2
 sso_registration_scopes = sso:account:access

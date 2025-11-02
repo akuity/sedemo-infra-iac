@@ -41,6 +41,7 @@
                 "ec2:DescribeVpcs",
                 "ecs:DescribeClusters",
                 "ecs:DescribeTaskDefinition",
+                "eks:DescribeCluster",
                 "elasticfilesystem:DescribeLifecycleConfiguration",
                 "elasticfilesystem:DescribeMountTargetSecurityGroups",
                 "kms:ListAliases",

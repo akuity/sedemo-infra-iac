@@ -22,11 +22,20 @@ variable "demo_domain" {
 
 variable "email_usernames" {
   description = "Who can act as operator on ARAD resources, by assume operator role."
+  default = [
+    "eddie.webbinaro",
+    "daniel",
+    "emily.chen",
+  ]
+
 }
 
 variable "sso_iam_role" {
   description = "Name of AWS IAM SSO role to be used for EKS auth by SE team. Assigned by IT"
   default     = "AWSReservedSSO_AdministratorAccess_e2e980dbad09a8b6"
+}
+output "sso_iam_role" {
+  value = var.sso_iam_role
 }
 
 variable "limited_assumed_role" {

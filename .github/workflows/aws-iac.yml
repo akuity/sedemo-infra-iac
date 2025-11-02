@@ -24,4 +24,4 @@ jobs:
         uses: opentofu/setup-opentofu@v1
       - run: tofu init
       - id: plan
-        run: tofu plan -no-color -var-file=default.tfvars
+        run: tofu plan -no-color
