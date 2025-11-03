@@ -68,7 +68,7 @@ resource "akp_kargo_agent" "kargo-agent" {
       remote_argocd  = akp_instance.se-demo-iac.id # pulled from resource above
     }
   }
-  depends_on = [ akp_kargo_instance.kargo-instance ]
+  depends_on = [akp_kargo_instance.kargo-instance]
 }
 
 
@@ -97,7 +97,7 @@ resource "akp_cluster" "eks-cluster" {
       size = "small"
     }
   }
-  depends_on = [ akp_instance.se-demo-iac ]
+  depends_on = [akp_instance.se-demo-iac]
 }
 
 # register the Kargo cluster with ArgoCD, so we can declaratively manage Kargo projects from ArgoCD
@@ -116,7 +116,7 @@ resource "akp_cluster" "kargo-cluster" {
       size = "small"
     }
   }
-  depends_on = [ akp_kargo_instance.kargo-instance, akp_instance.se-demo-iac ]
+  depends_on = [akp_kargo_instance.kargo-instance, akp_instance.se-demo-iac]
 }
 
 
@@ -151,6 +151,6 @@ resource "argocd_application" "app-of-apps" {
     #   }
     # }
   }
-  depends_on = [ akp_cluster.eks-cluster ]
+  depends_on = [akp_cluster.eks-cluster]
 
 }
