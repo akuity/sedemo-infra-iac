@@ -77,8 +77,6 @@ module "eks" {
 
     }
   }
-
-
   # Allow kubectl access via AWS SSO credentials
   access_entries = {
     # pipeline access to k8s

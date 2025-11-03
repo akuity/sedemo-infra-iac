@@ -32,3 +32,37 @@ resource "argocd_application" "app-of-apps" {
   }
 
 }
+
+
+resource "argocd_application" "app-of-components" {
+  metadata {
+    name      = "app-of-components"
+    namespace = "argocd"
+    labels = {
+      cluster = "in-cluster"
+    }
+  }
+
+  spec {
+    destination {
+      name = "in-cluster"
+    }
+
+    source {
+      repo_url = var.source_repo_url
+      path     = "components"
+      directory {
+        recurse = var.source_directory_recursive
+      }
+    }
+
+    # sync_policy {
+    #   automated {
+    #     prune     = true
+    #     self_heal = true
+
+    #   }
+    # }
+  }
+
+}
