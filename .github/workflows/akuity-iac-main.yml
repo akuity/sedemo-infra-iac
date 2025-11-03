@@ -41,7 +41,7 @@ jobs:
       - id: plan
         run: tofu plan -var argo_admin_password=$TF_VAR_ARGO_ADMIN_PASSWORD
       - id: apply
-        run: tofu apply -var argo_admin_password=$TF_VAR_ARGO_ADMIN_PASSWORD
+        run: tofu apply  --auto-approve -var argo_admin_password=$TF_VAR_ARGO_ADMIN_PASSWORD
   app_of_apps:
     needs: [akuity_setup]
     defaults:
@@ -68,4 +68,4 @@ jobs:
       - id: plan
         run: tofu plan
       - id: apply
-        run: tofu apply
+        run: tofu apply --auto-approve
