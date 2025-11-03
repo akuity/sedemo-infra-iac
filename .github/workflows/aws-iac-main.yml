@@ -1,5 +1,5 @@
 name: AWS IAC
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+run-name: APPLY iac to AWS environment (main) 🚀
 on:
   push:
     branches:

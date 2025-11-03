@@ -1,5 +1,5 @@
 name: AWS IAC
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+run-name: FMT and PLAN IaC on feature branch
 on:
   pull_request:
     types: [opened, reopened, ready_for_review, synchronize]
