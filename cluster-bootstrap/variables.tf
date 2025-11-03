@@ -12,7 +12,7 @@ variable "org_name" {
 variable "akp_instance_name" {
   description = "The name of the AKP instance to create or update."
   type        = string
-  default     = "se-demo-iac"
+  default     = "se-demo-iac-dev"
 }
 
 variable "akp_instance_version" {
@@ -24,7 +24,7 @@ variable "akp_instance_version" {
 variable "kargo_instance_name" {
   description = "The name of the Kargo instance to create or update."
   type        = string
-  default     = "se-demo-iac-kargo"
+  default     = "se-demo-iac-kargo-dev"
 }
 
 variable "kargo_instance_version" {

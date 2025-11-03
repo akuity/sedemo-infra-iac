@@ -1,4 +1,10 @@
 terraform {
+  backend "s3" {
+    bucket       = "arad-tf-state-files"
+    region       = "us-west-2"
+    key          = "akuity-${var.akp_instance_name}/terraform.tfstate"
+    use_lockfile = true
+  }
   required_providers {
     akp = {
       source = "akuity/akp"
@@ -8,7 +14,6 @@ terraform {
     }
   }
 }
-
 
 provider "akp" {
   org_name = "demo"
@@ -24,6 +29,12 @@ provider "argocd" {
 
 provider "helm" {
   kubernetes = {
-    config_path = "~/.kube/config"
+    host                   = data.terraform_remote_state.primary_cluster.module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(data.terraform_remote_state.primary_cluster.module.eks.cluster_certificate_authority_data)
+    exec = {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      args        = ["eks", "get-token", "--cluster-name", data.terraform_remote_state.primary_cluster.module.eks.cluster_name]
+      command     = "aws"
+    }
   }
 }
