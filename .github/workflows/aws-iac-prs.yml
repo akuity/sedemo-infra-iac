@@ -3,7 +3,6 @@ run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
   pull_request:
     types: [opened, reopened, ready_for_review]
-  push: {}
 defaults:
   run:
     working-directory: core-env/aws
