@@ -40,3 +40,5 @@ jobs:
       - run: tofu init
       - id: plan
         run: tofu plan -var argo_admin_password=$TF_VAR_ARGO_ADMIN_PASSWORD
+      - id: apply
+        run: tofu apply -var argo_admin_password=$TF_VAR_ARGO_ADMIN_PASSWORD
