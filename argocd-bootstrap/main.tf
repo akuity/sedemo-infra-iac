@@ -47,13 +47,49 @@ resource "argocd_application" "app-of-components" {
     destination {
       name = "in-cluster"
     }
-    project = "components"
+    project = "default"
 
     source {
       repo_url = var.source_repo_url
       path     = "components"
       directory {
         recurse = var.source_directory_recursive
+      }
+    }
+
+    # sync_policy {
+    #   automated {
+    #     prune     = true
+    #     self_heal = true
+
+    #   }
+    # }
+  }
+
+}
+
+
+resource "argocd_application" "app-of-kargo" {
+  metadata {
+    name      = "app-of-kargo"
+    namespace = "argocd"
+    labels = {
+      cluster = "in-cluster"
+    }
+  }
+
+  spec {
+    destination {
+      name = "in-cluster"
+    }
+    project = "default"
+
+    source {
+      repo_url = var.source_repo_url
+      path     = "kargo"
+    
+      directory {
+        recurse = false
       }
     }
 
