@@ -47,6 +47,7 @@ resource "argocd_application" "app-of-components" {
     destination {
       name = "in-cluster"
     }
+    project = "components"
 
     source {
       repo_url = var.source_repo_url
