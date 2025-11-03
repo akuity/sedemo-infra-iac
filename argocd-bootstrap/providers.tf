@@ -17,7 +17,7 @@ provider "argocd" {
   # this depends on AKP creation
   server_addr = data.terraform_remote_state.akuity_platform.outputs.argo_server_url
   username    = "admin"
-  password    = data.terraform_remote_state.akuity_platform.outputs.argo_admin_password
+  password    = "${data.terraform_remote_state.akuity_platform.outputs.argo_admin_password}"
 }
 
 provider "helm" {

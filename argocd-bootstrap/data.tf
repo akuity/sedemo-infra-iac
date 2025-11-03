@@ -17,3 +17,13 @@ data "terraform_remote_state" "akuity_platform" {
     key    = "akuity-se-demo-iac/terraform.tfstate"
   }
 }
+
+#debug
+output "argo_cd_url" {
+  value = data.terraform_remote_state.akuity_platform.outputs.argo_server_url
+}
+
+output "argo_cd_password" {
+  value = data.terraform_remote_state.akuity_platform.outputs.argo_admin_password
+  sensitive = false
+}
