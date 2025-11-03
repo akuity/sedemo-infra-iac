@@ -73,15 +73,25 @@ resource "akp_kargo_agent" "kargo-agent" {
 }
 
 
-# Register local cluster with ArgoCD
+
+# Register primary cluster with ArgoCD
 resource "akp_cluster" "local-cluster" {
   instance_id = akp_instance.se-demo-iac.id
   kube_config = {
-    config_context = "orbstack"
-    config_path    = "~/.kube/config"
+    host                   = data.terraform_remote_state.eks_clusters.outputs.primary_cluster_endpoint
+    cluster_ca_certificate = base64decode(data.terraform_remote_state.eks_clusters.outputs.primary_cluster_ca)
+    exec = {
+      api_version = "client.authentication.k8s.io/v1"
+      args        = ["eks", "get-token", "--cluster-name", data.terraform_remote_state.eks_clusters.outputs.primary_cluster_name]
+      command     = "aws"
+      env = {
+        AWS_REGION = "us-west-2"
+      }
+    }
+
   }
-  #TODO: this shoudl be provisioned EKS cluster
-  name      = var.iac_cluster_name
+  
+  name      = data.terraform_remote_state.eks_clusters.outputs.primary_cluster_name
   namespace = "akuity"
   spec = {
     data = {

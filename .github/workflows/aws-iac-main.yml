@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'core-env/**'
+      - '.github/workflows/aws*'
 permissions:
   id-token: write
 jobs:

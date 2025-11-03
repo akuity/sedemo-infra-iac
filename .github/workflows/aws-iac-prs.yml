@@ -3,6 +3,9 @@ run-name: FMT and PLAN IaC on feature branch
 on:
   pull_request:
     types: [opened, reopened, ready_for_review, synchronize]
+    paths:
+      - 'core-env/**'
+      - '.github/workflows/aws*'
 permissions:
   id-token: write
   pull-requests: write

@@ -1,4 +1,4 @@
-data "terraform_remote_state" "primary_cluster" {
+data "terraform_remote_state" "eks_clusters" {
   backend = "s3"
 
   config = {
