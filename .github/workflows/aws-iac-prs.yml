@@ -89,7 +89,9 @@ jobs:
           name: output-eks
           path: /tmp/*.out
   pr_comment:
-    needs: eks_primary
+    needs: 
+      - eks_primary
+      - aws_core
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
@@ -111,8 +113,25 @@ jobs:
             })
 
             // 2. Prepare format of the comment
+            const awsCorePlan = fs.readFileSync('output-aws/plan.out', 'utf8');
+            const eksPrimaryPlan = fs.readFileSync('output-eks/plan.out', 'utf8');
             const output = `
-            #### OpenTofu Format and Style: AWS Core 🖌\`${{ needs.core_aws.outputs.fmt }}\`
+            ### AWS Core
+
+            #### OpenTofu Format and Style 🖌\`${{ needs.core_aws.outputs.fmt }}\`
+
+            #### OpenTofu Plan 📖
+
+            <details><summary>Show Plan</summary>
+
+            \`\`\`\n
+            ${awsCorePlan}
+            ${{ needs.core_aws.outputs.plan }}
+            \`\`\`
+
+            </details>
+
+            ### EKS Primary Cluster
             #### OpenTofu Format and Style: EKS Primary Cluster 🖌\`${{ needs.eks_primary.outputs.fmt }}\`
 
             #### OpenTofu Plan: AWS Core 📖
