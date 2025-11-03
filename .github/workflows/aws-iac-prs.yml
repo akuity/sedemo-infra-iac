@@ -50,7 +50,7 @@ jobs:
   eks_primary:
     needs: core_aws
     outputs:
-      plan: ${{ steps.outcome.outputs.output }}
+      plan: ${{ steps.plan_outcome.outputs.output }}
       fmt: ${{ steps.fmt_outcome.outputs.output }}
     defaults:
       run:
