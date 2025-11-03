@@ -28,6 +28,6 @@ variable "ingress_namespace" {
 }
 
 variable "root_domain_name" {
-    default = "akpdemoapps.link"
-    description = "This is registered/managed outside Terraform so we can destroy clusters without destroying domain registration."
+  default     = "akpdemoapps.link"
+  description = "This is registered/managed outside Terraform so we can destroy clusters without destroying domain registration."
 }

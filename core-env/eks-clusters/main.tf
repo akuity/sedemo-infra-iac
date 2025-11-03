@@ -149,7 +149,7 @@ module "eks" {
 
 # We don't import/manage the root domainzone, only the sub-domains or records we hang off it.
 data "aws_route53_zone" "root_demo_domain_zone" {
-  name         = var.root_domain_name
+  name = var.root_domain_name
 }
 
 resource "helm_release" "nginx_ingress" {
@@ -162,6 +162,36 @@ resource "helm_release" "nginx_ingress" {
     file("${path.module}/nginx-helm/values.yaml")
   ]
   depends_on = [module.eks]
+}
+
+# the helm chart above will implore AWS to create an ELB. We'll need it's name for the A record below.
+data "aws_elb" "nginx_ingress" {
+  name = substr(data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname, 0, 32)
+
+  depends_on = [
+    helm_release.nginx_ingress
+  ]
+}
+
+resource "aws_route53_record" "landing_global_record" {
+  zone_id = data.aws_route53_zone.root_demo_domain_zone.id
+  name    = data.aws_route53_zone.root_demo_domain_zone.name
+  type    = "A"
+
+  # Using alias gives us health checks without explicit definition of 'HealthCheck'
+  alias {
+    name                   = data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname
+    zone_id                = data.aws_elb.nginx_ingress.zone_id
+    evaluate_target_health = true
+  }
+
+  weighted_routing_policy {
+    weight = 100 #every region has equal weight, failover based on alias health check is all we rely on
+  }
+
+  set_identifier = var.primary_cluster_name
+
+  depends_on = [helm_release.nginx_ingress]
 }
 
 resource "aws_route53_record" "records" {
