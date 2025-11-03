@@ -12,8 +12,8 @@ permissions:
 jobs:
   core_aws:
     outputs:
-      tofu-plan-aws: ${{ steps.plan_output.outputs.output }}
-      tofu-fmt-aws: ${{ steps.fmt_outcome.outputs.output }}
+      plan: ${{ steps.plan_outcome.outputs.output }}
+      fmt: ${{ steps.fmt_outcome.outputs.output }}
     defaults:
       run:
         working-directory: core-env/aws
@@ -33,23 +33,28 @@ jobs:
         uses: opentofu/setup-opentofu@v1
       - name: OpenTofu fmt
         id: fmt
-        run: tofu fmt -check
+        run: tofu fmt -check > /tmp/fmt.out
         continue-on-error: true
       - name: fmt output
         id: fmt_outcome
         run: echo "output=${{steps.fmt.outcome}}" >> "$GITHUB_OUTPUT"
       - run: tofu init
       - id: plan
-        run: tofu plan -no-color 
+        run: tofu plan -no-color > /tmp/plan.out
         continue-on-error: true
       - name: plan output
-        id: plan_output
-        run: echo "output=${{steps.plan.outputs.stdout}}" >> "$GITHUB_OUTPUT"
+        id: plan_outcome
+        run: echo "output=${{steps.plan.outcome}}" >> "$GITHUB_OUTPUT"
+      - name: Upload plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: output-aws
+          path: /tmp/*.out
   eks_primary:
     needs: core_aws
     outputs:
-      tofu-plan-aws: ${{ steps.plan_output.outputs.output }}
-      tofu-fmt-aws: ${{ steps.fmt_outcome.outputs.output }}
+      plan: ${{ steps.plan_output.outputs.output }}
+      fmt: ${{ steps.fmt_outcome.outputs.output }}
     defaults:
       run:
         working-directory: core-env/eks-clusters
@@ -69,22 +74,33 @@ jobs:
         uses: opentofu/setup-opentofu@v1
       - name: OpenTofu fmt
         id: fmt
-        run: tofu fmt -check
+        run: tofu fmt -check > /tmp/fmt.out
         continue-on-error: true
       - name: fmt output
         id: fmt_outcome
         run: echo "output=${{steps.fmt.outcome}}" >> "$GITHUB_OUTPUT"
       - run: tofu init
       - id: plan
-        run: tofu plan -no-color
+        run: tofu plan -no-color > /tmp/plan.out
         continue-on-error: true
       - name: plan output
-        id: plan_output
-        run: echo "output=${{steps.plan.outputs.stdout}}" >> "$GITHUB_OUTPUT"
+        id: plan_outcome
+        run: echo "output=${{steps.plan.outcome}}" >> "$GITHUB_OUTPUT"
+      - name: Upload plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: output-eks
+          path: /tmp/*.out
   pr_comment:
     needs: eks_primary
     runs-on: ubuntu-latest
     steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          artifact-ids: [output-aws, output-eks]
+      - name: Display structure of downloaded files
+        run: ls -R .
       - uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
