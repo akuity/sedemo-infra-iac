@@ -1,3 +1,6 @@
+name: Akuity Platform Setup
+run-name: Apply IAC to Akuity Platform (main) 🚀
+
 on:
   push:
     branches:

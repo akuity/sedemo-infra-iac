@@ -58,7 +58,7 @@ variable "argo_admin_password" {
 variable "source_repo_url" {
   description = "The git URL of the repo containing the app-of-apps."
   type        = string
-  default = "https://github.com/akuity/sedemo-platform"
+  default     = "https://github.com/akuity/sedemo-platform"
 }
 
 variable "source_repo_target_revision" {
