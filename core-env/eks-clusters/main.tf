@@ -147,12 +147,17 @@ module "eks" {
   }
 }
 
+# We don't import/manage the root domainzone, only the sub-domains or records we hang off it.
+data "aws_route53_zone" "root_demo_domain_zone" {
+  name         = var.root_domain_name
+}
+
 resource "helm_release" "nginx_ingress" {
   name             = "ingress-nginx"
   repository       = "https://kubernetes.github.io/ingress-nginx"
   chart            = "ingress-nginx"
   create_namespace = true
-  namespace        = "ingress-nginx"
+  namespace        = var.ingress_namespace
   values = [
     file("${path.module}/nginx-helm/values.yaml")
   ]
@@ -164,7 +169,7 @@ resource "aws_route53_record" "records" {
     "*."
   ])
 
-  zone_id = var.root_domain_zone_id
+  zone_id = data.aws_route53_zone.root_demo_domain_zone.id
   name    = each.key
   type    = "CNAME"
   ttl     = 5

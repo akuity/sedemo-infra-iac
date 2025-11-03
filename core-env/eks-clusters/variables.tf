@@ -27,7 +27,7 @@ variable "ingress_namespace" {
   default = "ingress-nginx"
 }
 
-variable "root_domain_zone_id" {
-    default = "Z06080061D8PFBX2D8WN4"
-    description = "akpdemoapps.link"
+variable "root_domain_name" {
+    default = "akpdemoapps.link"
+    description = "This is registered/managed outside Terraform so we can destroy clusters without destroying domain registration."
 }
