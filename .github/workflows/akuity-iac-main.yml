@@ -43,6 +43,7 @@ jobs:
       - id: apply
         run: tofu apply -var argo_admin_password=$TF_VAR_ARGO_ADMIN_PASSWORD
   app_of_apps:
+    needs: [akuity_setup]
     defaults:
       run:
         working-directory: argocd-bootstrap
@@ -65,6 +66,6 @@ jobs:
         run: tofu fmt -check
       - run: tofu init
       - id: plan
-        run: tofu plan -var argo_admin_password=$TF_VAR_ARGO_ADMIN_PASSWORD
+        run: tofu plan
       - id: apply
-        run: tofu apply -var argo_admin_password=$TF_VAR_ARGO_ADMIN_PASSWORD
+        run: tofu apply
