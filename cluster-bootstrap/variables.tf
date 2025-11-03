@@ -12,7 +12,7 @@ variable "org_name" {
 variable "akp_instance_name" {
   description = "The name of the AKP instance to create or update."
   type        = string
-  default     = "se-demo-iac-dev"
+  default     = "se-demo-iac"
 }
 
 variable "akp_instance_version" {
@@ -24,7 +24,7 @@ variable "akp_instance_version" {
 variable "kargo_instance_name" {
   description = "The name of the Kargo instance to create or update."
   type        = string
-  default     = "se-demo-iac-kargo-dev"
+  default     = "se-demo-iac-kargo"
 }
 
 variable "kargo_instance_version" {
@@ -51,32 +51,26 @@ variable "argo_admin_password" {
   sensitive   = true
 }
 
-variable "iac_cluster_name" {
-  description = "The name of the local cluster to register with ArgoCD."
-  type        = string
-}
+
+# APP of APP config
+# This is the single root seed for all other argoCD apps.
 
 variable "source_repo_url" {
   description = "The git URL of the repo containing the app-of-apps."
   type        = string
-}
-
-variable "destination_cluster_name" {
-  description = "The name of the destination cluster in ArgoCD."
-  type        = string
+  default = "https://github.com/akuity/sedemo-platform"
 }
 
 variable "source_repo_target_revision" {
   description = "The git revision (branch, tag, commit) of the repo containing the app-of-apps."
   type        = string
   default     = "HEAD"
-
 }
 
 variable "source_directory_recursive" {
   description = "The path within the git repo to the app-of-apps."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "source_directory_path" {

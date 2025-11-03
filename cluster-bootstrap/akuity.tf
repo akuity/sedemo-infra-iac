@@ -75,7 +75,7 @@ resource "akp_kargo_agent" "kargo-agent" {
 
 
 # Register primary cluster with ArgoCD
-resource "akp_cluster" "local-cluster" {
+resource "akp_cluster" "eks-cluster" {
   instance_id = akp_instance.se-demo-iac.id
   kube_config = {
     host                   = data.terraform_remote_state.eks_clusters.outputs.primary_cluster_endpoint
@@ -90,7 +90,7 @@ resource "akp_cluster" "local-cluster" {
     }
 
   }
-  
+
   name      = data.terraform_remote_state.eks_clusters.outputs.primary_cluster_name
   namespace = "akuity"
   spec = {
