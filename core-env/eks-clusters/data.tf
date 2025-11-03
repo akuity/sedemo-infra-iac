@@ -10,7 +10,7 @@ data "terraform_remote_state" "arad_aws_state" {
 
 data "kubernetes_service_v1" "nginx_ingress" {
   metadata {
-    name      = "ingress-nginx"
+    name      = "ingress-nginx-controller"
     namespace = var.ingress_namespace
   }
 
