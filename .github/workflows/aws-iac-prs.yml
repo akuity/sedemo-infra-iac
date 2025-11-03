@@ -50,7 +50,7 @@ jobs:
   eks_primary:
     needs: core_aws
     outputs:
-      plan: ${{ steps.plan_output.outputs.output }}
+      plan: ${{ steps.outcome.outputs.output }}
       fmt: ${{ steps.fmt_outcome.outputs.output }}
     defaults:
       run:
@@ -137,9 +137,9 @@ jobs:
             </details>
 
             ### EKS Primary Cluster
-            #### OpenTofu Format and Style: EKS Primary Cluster 🖌\`${{ needs.eks_primary.outputs.fmt }}\`
+            #### OpenTofu Format and Style 🖌\`${{ needs.eks_primary.outputs.fmt }}\`
 
-            #### OpenTofu Plan: AWS Core 📖 \`${{ needs.eks_primary.outputs.plan }}\`
+            #### OpenTofu Plan 📖 \`${{ needs.eks_primary.outputs.plan }}\`
 
             <details><summary>Show Plan</summary>
 
