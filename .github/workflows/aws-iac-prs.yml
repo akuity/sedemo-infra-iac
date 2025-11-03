@@ -33,11 +33,11 @@ jobs:
         uses: opentofu/setup-opentofu@v1
       - name: OpenTofu fmt
         id: fmt
-        run: tofu fmt -check
+        run: tofu fmt -check > $GITHUB_OUTPUT
         continue-on-error: true
       - run: tofu init
       - id: plan
-        run: tofu plan -no-color
+        run: tofu plan -no-color > $GITHUB_OUTPUT
         continue-on-error: true
   eks_primary:
     needs: core_aws
@@ -63,11 +63,11 @@ jobs:
         uses: opentofu/setup-opentofu@v1
       - name: OpenTofu fmt
         id: fmt
-        run: tofu fmt -check
+        run: tofu fmt -check > $GITHUB_OUTPUT
         continue-on-error: true
       - run: tofu init
       - id: plan
-        run: tofu plan -no-color
+        run: tofu plan -no-color > $GITHUB_OUTPUT
         continue-on-error: true
   pr_comment:
     needs: eks_primary
