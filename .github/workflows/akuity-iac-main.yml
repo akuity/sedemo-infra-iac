@@ -6,7 +6,8 @@ on:
     branches:
       - main
     paths:
-      - 'cluster-bootstrap/**'
+      - 'akuity-bootstrap/**'
+      - 'argocd-bootstrap/**'
       - '.github/workflows/akuity*'
 permissions:
   id-token: write
