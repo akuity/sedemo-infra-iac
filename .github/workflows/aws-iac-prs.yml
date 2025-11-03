@@ -118,6 +118,7 @@ jobs:
             })
 
             // 2. Prepare format of the comment
+            const fs = require('fs');
             const awsCorePlan = fs.readFileSync('output-aws/plan.out', 'utf8');
             const eksPrimaryPlan = fs.readFileSync('output-eks/plan.out', 'utf8');
             const output = `
