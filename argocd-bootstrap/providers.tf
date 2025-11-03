@@ -2,29 +2,22 @@ terraform {
   backend "s3" {
     bucket       = "arad-tf-state-files"
     region       = "us-west-2"
-    key          = "akuity-${var.akp_instance_name}/terraform.tfstate"
+    key          = "argocd-se-demo-iac/terraform.tfstate"
     use_lockfile = true
   }
   required_providers {
-    akp = {
-      source = "akuity/akp"
-    }
     argocd = {
       source = "argoproj-labs/argocd"
     }
   }
 }
 
-provider "akp" {
-  org_name = "demo"
-}
-
 
 provider "argocd" {
   # this depends on AKP creation
-  server_addr = "${akp_instance.se-demo-iac.argocd.spec.instance_spec.subdomain}.cd.akuity.cloud"
+  server_addr = data.terraform_remote_state.akuity_platform.outputs.argo_server_url
   username    = "admin"
-  password    = var.argo_admin_password
+  password    = data.terraform_remote_state.akuity_platform.outputs.argo_admin_password
 }
 
 provider "helm" {
