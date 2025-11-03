@@ -12,8 +12,8 @@ permissions:
 jobs:
   core_aws:
     outputs:
-      tofu-plan-aws: ${{ steps.plan.outputs.stdout }}
-      tofu-fmt-aws: ${{ steps.fmt.outputs.stdout }}
+      tofu-plan-aws: ${{ steps.plan_output.outputs.output }}
+      tofu-fmt-aws: ${{ steps.fmt_outcome.outputs.output }}
     defaults:
       run:
         working-directory: core-env/aws
@@ -33,17 +33,23 @@ jobs:
         uses: opentofu/setup-opentofu@v1
       - name: OpenTofu fmt
         id: fmt
-        run: tofu fmt -check > $GITHUB_OUTPUT
+        run: tofu fmt -check
         continue-on-error: true
+      - name: fmt output
+        id: fmt_outcome
+        run: echo "output=${{steps.fmt.outcome}}" >> "$GITHUB_OUTPUT"
       - run: tofu init
       - id: plan
-        run: tofu plan -no-color > $GITHUB_OUTPUT
+        run: tofu plan -no-color 
         continue-on-error: true
+      - name: plan output
+        id: plan_output
+        run: echo "output=${{steps.plan.output}}" >> "$GITHUB_OUTPUT"
   eks_primary:
     needs: core_aws
     outputs:
-      tofu-plan-eks-primary: ${{ steps.plan.outputs.stdout }}
-      tofu-fmt-aws: ${{ steps.fmt.outputs.stdout }}
+      tofu-plan-aws: ${{ steps.plan_output.outputs.output }}
+      tofu-fmt-aws: ${{ steps.fmt_outcome.outputs.output }}
     defaults:
       run:
         working-directory: core-env/eks-clusters
@@ -63,12 +69,18 @@ jobs:
         uses: opentofu/setup-opentofu@v1
       - name: OpenTofu fmt
         id: fmt
-        run: tofu fmt -check > $GITHUB_OUTPUT
+        run: tofu fmt -check
         continue-on-error: true
+      - name: fmt output
+        id: fmt_outcome
+        run: echo "output=${{steps.fmt.outcome}}" >> "$GITHUB_OUTPUT"
       - run: tofu init
       - id: plan
-        run: tofu plan -no-color > $GITHUB_OUTPUT
+        run: tofu plan -no-color
         continue-on-error: true
+      - name: plan output
+        id: plan_output
+        run: echo "output=${{steps.plan.output}}" >> "$GITHUB_OUTPUT"
   pr_comment:
     needs: eks_primary
     runs-on: ubuntu-latest
