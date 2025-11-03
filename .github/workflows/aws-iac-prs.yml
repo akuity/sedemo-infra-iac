@@ -44,7 +44,7 @@ jobs:
         continue-on-error: true
       - name: plan output
         id: plan_output
-        run: echo "output=${{steps.plan.output}}" >> "$GITHUB_OUTPUT"
+        run: echo "output=${{steps.plan.outputs.stdout}}" >> "$GITHUB_OUTPUT"
   eks_primary:
     needs: core_aws
     outputs:
@@ -80,7 +80,7 @@ jobs:
         continue-on-error: true
       - name: plan output
         id: plan_output
-        run: echo "output=${{steps.plan.output}}" >> "$GITHUB_OUTPUT"
+        run: echo "output=${{steps.plan.outputs.stdout}}" >> "$GITHUB_OUTPUT"
   pr_comment:
     needs: eks_primary
     runs-on: ubuntu-latest
