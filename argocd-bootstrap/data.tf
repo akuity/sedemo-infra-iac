@@ -25,5 +25,5 @@ output "argo_cd_url" {
 
 output "argo_cd_password" {
   value     = data.terraform_remote_state.akuity_platform.outputs.argo_admin_password
-  sensitive = false
+  sensitive = true
 }
