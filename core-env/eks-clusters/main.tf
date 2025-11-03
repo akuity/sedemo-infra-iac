@@ -147,43 +147,6 @@ module "eks" {
   }
 }
 
-# module "vpc_cni_irsa" {
-#   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-#   version = "~> 4.12"
-
-#   role_name_prefix      = "VPC-CNI-IRSA"
-#   attach_vpc_cni_policy = true
-#   vpc_cni_enable_ipv6   = true
-
-#   oidc_providers = {
-#     main = {
-#       provider_arn               = module.eks.oidc_provider_arn
-#       namespace_service_accounts = ["kube-system:aws-node"]
-#     }
-#   }
-
-#   tags = local.tags
-# }
-
-
-# Expose the cluster to internet via custom domain
-
-import {
-  to = aws_route53_zone.demo_domain
-  id = "Z01905343OT8D9ZSW46CJ"
-}
-
-resource "aws_route53_zone" "demo_domain" {
-  name    = var.root_domain_name
-  comment = "Please contact eddie.webbinaro@akuity.io with questions"
-  tags = {
-    "Owner" = var.common_tags.owner
-  }
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
 resource "helm_release" "nginx_ingress" {
   name             = "ingress-nginx"
   repository       = "https://kubernetes.github.io/ingress-nginx"
@@ -201,7 +164,7 @@ resource "aws_route53_record" "records" {
     "*."
   ])
 
-  zone_id = aws_route53_zone.demo_domain.id
+  zone_id = var.root_domain_zone_id
   name    = each.key
   type    = "CNAME"
   ttl     = 5

@@ -23,10 +23,11 @@ variable "primary_cluser_node_type" {
   default = "t3.large"
 }
 
-variable "root_domain_name" {
-  default = "demoapps.akuity.io"
-}
-
 variable "ingress_namespace" {
   default = "ingress-nginx"
+}
+
+variable "root_domain_zone_id" {
+    default = "Z06080061D8PFBX2D8WN4"
+    description = "akpdemoapps.link"
 }
