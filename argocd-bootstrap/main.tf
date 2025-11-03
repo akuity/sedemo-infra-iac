@@ -87,7 +87,7 @@ resource "argocd_application" "app-of-kargo" {
     source {
       repo_url = var.source_repo_url
       path     = "kargo"
-    
+
       directory {
         recurse = false
       }
