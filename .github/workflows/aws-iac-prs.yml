@@ -71,7 +71,7 @@ jobs:
   pr_comment:
     needs: eks_primary
     runs-on: ubuntu-latest
-    jobs:
+    steps:
       - uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
