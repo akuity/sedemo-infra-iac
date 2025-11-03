@@ -4,7 +4,7 @@ on:
       - main
     paths:
       - 'cluster-bootstrap/**'
-      - '.github/akuity*'
+      - '.github/workflows/akuity*'
 permissions:
   id-token: write
   pull-requests: write
