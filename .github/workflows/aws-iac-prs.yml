@@ -8,6 +8,7 @@ defaults:
     working-directory: core-env/aws
 permissions:
   id-token: write
+  pull-requests: write
 jobs:
   core_aws:
     outputs:
