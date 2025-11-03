@@ -70,8 +70,8 @@ resource "aws_iam_role" "demo_gha_role" {
   assume_role_policy = templatefile(
     "${path.module}/templates/pipeline_role.json.tpl",
     {
-      AWS_ACCOUNT_ID  = data.aws_caller_identity.current.id,
-      SSO_USER_LIST   = tostring(jsonencode(local.sso_user_list))
+      AWS_ACCOUNT_ID = data.aws_caller_identity.current.id,
+      SSO_USER_LIST  = tostring(jsonencode(local.sso_user_list))
     }
   )
 
