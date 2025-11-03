@@ -7,97 +7,102 @@ permissions:
   id-token: write
   pull-requests: write
 jobs:
-  core_aws:
-    outputs:
-      plan: ${{ steps.plan_outcome.outputs.output }}
-      fmt: ${{ steps.fmt_outcome.outputs.output }}
-    defaults:
-      run:
-        working-directory: core-env/aws
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@main # Or a specific version
-        with:
-          role-to-assume: arn:aws:iam::218691292270:role/sedemo-iac-pipeline-role
-          aws-region: us-west-2
-      - name: Verify AWS identity
-        run: |
-          # Your commands that require AWS credentials
-          aws sts get-caller-identity
-      - name: Verify Tofu
-        uses: opentofu/setup-opentofu@v1
-      - name: OpenTofu fmt
-        id: fmt
-        run: tofu fmt -check > /tmp/fmt.out
-        continue-on-error: true
-      - name: fmt output
-        id: fmt_outcome
-        run: echo "output=${{steps.fmt.outcome}}" >> "$GITHUB_OUTPUT"
-      - run: tofu init
-      - id: plan
-        run: tofu plan -no-color > /tmp/plan.out
-        continue-on-error: true
-      - name: plan output
-        id: plan_outcome
-        run: echo "output=${{steps.plan.outcome}}" >> "$GITHUB_OUTPUT"
-      - name: Upload plan
-        uses: actions/upload-artifact@v4
-        with:
-          name: output-aws
-          path: /tmp/*.out
-  eks_primary:
-    needs: core_aws
-    outputs:
-      plan: ${{ steps.plan_output.outputs.output }}
-      fmt: ${{ steps.fmt_outcome.outputs.output }}
-    defaults:
-      run:
-        working-directory: core-env/eks-clusters
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@main # Or a specific version
-        with:
-          role-to-assume: arn:aws:iam::218691292270:role/sedemo-iac-pipeline-role
-          aws-region: us-west-2
-      - name: Verify AWS identity
-        run: |
-          # Your commands that require AWS credentials
-          aws sts get-caller-identity
-      - name: Verify Tofu
-        uses: opentofu/setup-opentofu@v1
-      - name: OpenTofu fmt
-        id: fmt
-        run: tofu fmt -check > /tmp/fmt.out
-        continue-on-error: true
-      - name: fmt output
-        id: fmt_outcome
-        run: echo "output=${{steps.fmt.outcome}}" >> "$GITHUB_OUTPUT"
-      - run: tofu init
-      - id: plan
-        run: tofu plan -no-color > /tmp/plan.out
-        continue-on-error: true
-      - name: plan output
-        id: plan_outcome
-        run: echo "output=${{steps.plan.outcome}}" >> "$GITHUB_OUTPUT"
-      - name: Upload plan
-        uses: actions/upload-artifact@v4
-        with:
-          name: output-eks
-          path: /tmp/*.out
+  # core_aws:
+  #   outputs:
+  #     plan: ${{ steps.plan_outcome.outputs.output }}
+  #     fmt: ${{ steps.fmt_outcome.outputs.output }}
+  #   defaults:
+  #     run:
+  #       working-directory: core-env/aws
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Configure AWS Credentials
+  #       uses: aws-actions/configure-aws-credentials@main # Or a specific version
+  #       with:
+  #         role-to-assume: arn:aws:iam::218691292270:role/sedemo-iac-pipeline-role
+  #         aws-region: us-west-2
+  #     - name: Verify AWS identity
+  #       run: |
+  #         # Your commands that require AWS credentials
+  #         aws sts get-caller-identity
+  #     - name: Verify Tofu
+  #       uses: opentofu/setup-opentofu@v1
+  #     - name: OpenTofu fmt
+  #       id: fmt
+  #       run: tofu fmt -check > /tmp/fmt.out
+  #       continue-on-error: true
+  #     - name: fmt output
+  #       id: fmt_outcome
+  #       run: echo "output=${{steps.fmt.outcome}}" >> "$GITHUB_OUTPUT"
+  #     - run: tofu init
+  #     - id: plan
+  #       run: tofu plan -no-color > /tmp/plan.out
+  #       continue-on-error: true
+  #     - name: plan output
+  #       id: plan_outcome
+  #       run: echo "output=${{steps.plan.outcome}}" >> "$GITHUB_OUTPUT"
+  #     - name: Upload plan
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: output-aws
+  #         path: /tmp/*.out
+  # eks_primary:
+  #   needs: core_aws
+  #   outputs:
+  #     plan: ${{ steps.plan_output.outputs.output }}
+  #     fmt: ${{ steps.fmt_outcome.outputs.output }}
+  #   defaults:
+  #     run:
+  #       working-directory: core-env/eks-clusters
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Configure AWS Credentials
+  #       uses: aws-actions/configure-aws-credentials@main # Or a specific version
+  #       with:
+  #         role-to-assume: arn:aws:iam::218691292270:role/sedemo-iac-pipeline-role
+  #         aws-region: us-west-2
+  #     - name: Verify AWS identity
+  #       run: |
+  #         # Your commands that require AWS credentials
+  #         aws sts get-caller-identity
+  #     - name: Verify Tofu
+  #       uses: opentofu/setup-opentofu@v1
+  #     - name: OpenTofu fmt
+  #       id: fmt
+  #       run: tofu fmt -check > /tmp/fmt.out
+  #       continue-on-error: true
+  #     - name: fmt output
+  #       id: fmt_outcome
+  #       run: echo "output=${{steps.fmt.outcome}}" >> "$GITHUB_OUTPUT"
+  #     - run: tofu init
+  #     - id: plan
+  #       run: tofu plan -no-color > /tmp/plan.out
+  #       continue-on-error: true
+  #     - name: plan output
+  #       id: plan_outcome
+  #       run: echo "output=${{steps.plan.outcome}}" >> "$GITHUB_OUTPUT"
+  #     - name: Upload plan
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: output-eks
+  #         path: /tmp/*.out
   pr_comment:
-    needs: 
-      - eks_primary
-      - aws_core
+    # needs: 
+    #   - eks_primary
+    #   - core_aws
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
+      # - name: Download artifact
+      #   uses: actions/download-artifact@v4
       - name: Display structure of downloaded files
-        run: ls -R .
+        run: |
+          mkdir output-aws
+          mkdir output-eks
+          echo "this is file content" >> output-aws/plan.out
+          echo "this is file content" >> output-eks/plan.out
+          ls -R .
       - uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
