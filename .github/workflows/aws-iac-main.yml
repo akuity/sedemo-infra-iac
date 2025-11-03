@@ -1,0 +1,52 @@
+name: AWS IAC
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+on:
+  push:
+    branches:
+      - main
+permissions:
+  id-token: write
+jobs:
+  core_aws:
+    defaults:
+      run:
+        working-directory: core-env/aws
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@main # Or a specific version
+        with:
+          role-to-assume: arn:aws:iam::218691292270:role/sedemo-iac-pipeline-role
+          aws-region: us-west-2
+      - name: Verify AWS identity
+        run: |
+          # Your commands that require AWS credentials
+          aws sts get-caller-identity
+      - name: Verify Tofu
+        uses: opentofu/setup-opentofu@v1
+      - run: tofu init
+      - id: apply
+        run: tofu apply --auto-approve
+  eks_primary:
+    needs: core_aws
+    defaults:
+      run:
+        working-directory: core-env/eks-clusters
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@main # Or a specific version
+        with:
+          role-to-assume: arn:aws:iam::218691292270:role/sedemo-iac-pipeline-role
+          aws-region: us-west-2
+      - name: Verify AWS identity
+        run: |
+          # Your commands that require AWS credentials
+          aws sts get-caller-identity
+      - name: Verify Tofu
+        uses: opentofu/setup-opentofu@v1
+      - run: tofu init
+      - id: apply
+        run: tofu apply --auto-approve
