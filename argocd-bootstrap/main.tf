@@ -8,15 +8,16 @@ resource "argocd_project" "projects" {
   spec {
     description = each.value.description
 
-    source_repos      = ["*"]
+    source_repos = ["*"]
 
-    
+
     dynamic "destination" {
       for_each = each.value.destinations
       iterator = DESTINATION
       content {
         name      = DESTINATION.value.name
         namespace = DESTINATION.value.namespace
+        server    = "*"
       }
     }
 
@@ -66,6 +67,7 @@ resource "argocd_application" "app-of-apps" {
     #   }
     # }
   }
+  depends_on = [argocd_project.projects]
 
 }
 
@@ -101,6 +103,7 @@ resource "argocd_application" "app-of-components" {
     #   }
     # }
   }
+  depends_on = [argocd_project.projects]
 
 }
 
@@ -137,4 +140,5 @@ resource "argocd_application" "app-of-kargo" {
     # }
   }
 
+  depends_on = [argocd_project.projects]
 }

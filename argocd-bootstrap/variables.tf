@@ -29,69 +29,69 @@ variable "source_directory_path" {
 
 variable "project_spaces" {
   description = "Project spaces allow apps to be logically grouped."
-  type    = map(object( 
+  type = map(object(
     {
-      name = string
+      name        = string
       description = string
       destinations = list(object({
-        name = string
+        name      = string
         namespace = string
       }))
       cluster-allows = list(object({
         group = string
-        kind = string
+        kind  = string
       }))
     }
-   ))
+  ))
   default = {
     "components" = {
-      "name" = "components"
+      "name"        = "components"
       "description" = "Cluster addons, components"
       "destinations" = [{
-        name = "*"
-        namespace ="*"
+        name      = "*"
+        namespace = "*"
       }]
       "cluster-allows" = [{
         group = "*"
-        kind = "*"
+        kind  = "*"
       }]
     }
 
     "pattern-apps" = {
-      "name" = "pattern-apps"
+      "name"        = "pattern-apps"
       "description" = "For  apps using org-wide standard ABC"
       "destinations" = [{
-        name = "*"
-        namespace ="*"
+        name      = "*"
+        namespace = "*"
       }]
       "cluster-allows" = [{
         group = "*"
-        kind = "Namespace"
+        kind  = "Namespace"
       }]
     }
 
     "kargo" = {
-      "name" = "kargo"
+      "name"        = "kargo"
       "description" = "Kargo definitions only"
       "destinations" = [{
-        name = "kargo"
-        namespace ="*"
+        name      = "*"
+        namespace = "*"
       }]
       "cluster-allows" = [{
         group = "*"
-        kind = "*"
+        kind  = "*"
       }]
     }
     "rollouts" = {
-      "name" = "rollouts"
+      "name"        = "rollouts"
       "description" = "Various progressive release demos"
       "destinations" = [{
-        name = "*"
-        namespace ="*"
+        name      = "*"
+        namespace = "*"
       }]
       "cluster-allows" = [{
         group = "*"
-        kind = "*"
+        kind  = "*"
       }]
     }
   }
