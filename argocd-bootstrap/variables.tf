@@ -26,3 +26,73 @@ variable "source_directory_path" {
   default     = "apps"
 
 }
+
+variable "project_spaces" {
+  description = "Project spaces allow apps to be logically grouped."
+  type    = map(object( 
+    {
+      name = string
+      description = string
+      destinations = list(object({
+        name = string
+        namespace = string
+      }))
+      cluster-allows = list(object({
+        group = string
+        kind = string
+      }))
+    }
+   ))
+  default = {
+    "components" = {
+      "name" = "components"
+      "description" = "Cluster addons, components"
+      "destinations" = [{
+        name = "*"
+        namespace ="*"
+      }]
+      "cluster-allows" = [{
+        group = "*"
+        kind = "*"
+      }]
+    }
+
+    "pattern-apps" = {
+      "name" = "pattern-apps"
+      "description" = "For  apps using org-wide standard ABC"
+      "destinations" = [{
+        name = "*"
+        namespace ="*"
+      }]
+      "cluster-allows" = [{
+        group = "*"
+        kind = "Namespace"
+      }]
+    }
+
+    "kargo" = {
+      "name" = "kargo"
+      "description" = "Kargo definitions only"
+      "destinations" = [{
+        name = "kargo"
+        namespace ="*"
+      }]
+      "cluster-allows" = [{
+        group = "*"
+        kind = "*"
+      }]
+    }
+    "rollouts" = {
+      "name" = "rollouts"
+      "description" = "Various progressive release demos"
+      "destinations" = [{
+        name = "*"
+        namespace ="*"
+      }]
+      "cluster-allows" = [{
+        group = "*"
+        kind = "*"
+      }]
+    }
+  }
+}

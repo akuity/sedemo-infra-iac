@@ -1,3 +1,39 @@
+resource "argocd_project" "projects" {
+  for_each = var.project_spaces
+  metadata {
+    name      = each.key
+    namespace = "argocd"
+  }
+
+  spec {
+    description = each.value.description
+
+    source_repos      = ["*"]
+
+    
+    dynamic "destination" {
+      for_each = each.value.destinations
+      iterator = DESTINATION
+      content {
+        name      = DESTINATION.value.name
+        namespace = DESTINATION.value.namespace
+      }
+    }
+
+    dynamic "cluster_resource_whitelist" {
+      for_each = each.value.cluster-allows
+      iterator = ALLOW
+      content {
+        group = ALLOW.value.group
+        kind  = ALLOW.value.kind
+      }
+    }
+
+  }
+}
+
+
+
 
 # Our app of apps that bootstraps the Platform team's setup.
 resource "argocd_application" "app-of-apps" {
@@ -47,7 +83,7 @@ resource "argocd_application" "app-of-components" {
     destination {
       name = "in-cluster"
     }
-    project = "default"
+    project = "components"
 
     source {
       repo_url = var.source_repo_url
@@ -82,12 +118,11 @@ resource "argocd_application" "app-of-kargo" {
     destination {
       name = "in-cluster"
     }
-    project = "default"
+    project = "kargo"
 
     source {
       repo_url = var.source_repo_url
       path     = "kargo"
-
       directory {
         recurse = false
       }
