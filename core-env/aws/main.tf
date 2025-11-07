@@ -109,10 +109,8 @@ resource "aws_iam_role_policy_attachment" "gha_attachment" {
 # Secrets Manager for ESO
 #
 
-
-# Specific role for GHA via OIDC to assume (can also be assumed by team)
 resource "aws_iam_policy" "demo_secrets_policy" {
-  name        = var.priviledged_assumed_role
+  name        = "sedemo-secrets-access-from-eks"
   description = "Policy to grant demo cluster access to secrets via ESO"
 
   policy = templatefile(
@@ -128,9 +126,8 @@ resource "aws_iam_policy" "demo_secrets_policy" {
   }
 }
 
-# Specific role for GHA via OIDC to assume (can also be assumed by team)
 resource "aws_iam_role" "secrets_role" {
-  name        = var.priviledged_assumed_role
+  name        = "sedemo-secrets-access-from-eks"
   description = "Role grants access to secrets policy for ESO"
 
   assume_role_policy = templatefile(
