@@ -119,3 +119,13 @@ resource "akp_cluster" "kargo-cluster" {
   depends_on = [akp_kargo_instance.kargo-instance, akp_instance.se-demo-iac]
 }
 
+resource "aws_route53_record" "records" {
+
+  zone_id = data.terraform_remote_state.eks_clusters.outputs.root_zone_id
+  name    = "argo.${data.terraform_remote_state.eks_clusters.outputs.demo_domain}"
+  type    = "CNAME"
+  ttl     = 5
+
+  records    = [output.argo_server_url]
+  depends_on = [akp_instance.se-demo-iac]
+}

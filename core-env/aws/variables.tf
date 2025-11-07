@@ -13,13 +13,6 @@ variable "common_tags" {
   }
 }
 
-
-variable "demo_domain" {
-  description = "Domain apps will be exposed via ingress"
-  type        = string
-  default     = "demoapps.akuity.io"
-}
-
 variable "email_usernames" {
   description = "Who can act as operator on ARAD resources, by assume operator role."
   default = [

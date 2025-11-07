@@ -103,9 +103,50 @@ resource "aws_iam_role_policy_attachment" "gha_attachment" {
   policy_arn = aws_iam_policy.demo_gha_policy.arn
 }
 
-output "demo_operator_role_arn" {
-  value = aws_iam_role.demo_role.arn
+
+
+#
+# Secrets Manager for ESO
+#
+
+
+# Specific role for GHA via OIDC to assume (can also be assumed by team)
+resource "aws_iam_policy" "demo_secrets_policy" {
+  name        = var.priviledged_assumed_role
+  description = "Policy to grant demo cluster access to secrets via ESO"
+
+  policy = templatefile(
+    "${path.module}/templates/secrets_policy.json.tpl",
+    {
+      AWS_ACCOUNT_ID = data.aws_caller_identity.current.id
+    }
+  )
+
+  tags = var.common_tags
+  lifecycle {
+    create_before_destroy = true
+  }
 }
-output "demo_pipeline_role_arn" {
-  value = aws_iam_role.demo_gha_role.arn
+
+# Specific role for GHA via OIDC to assume (can also be assumed by team)
+resource "aws_iam_role" "secrets_role" {
+  name        = var.priviledged_assumed_role
+  description = "Role grants access to secrets policy for ESO"
+
+  assume_role_policy = templatefile(
+    "${path.module}/templates/secrets_role.json.tpl",
+    {
+
+    }
+  )
+
+  tags = var.common_tags
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "secrets_attachment" {
+  role       = aws_iam_role.secrets_role.name
+  policy_arn = aws_iam_policy.demo_secrets_policy.arn
 }
