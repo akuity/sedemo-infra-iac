@@ -73,10 +73,6 @@ module "eks" {
       }
 
       iam_role_attach_cni_policy = true
-      #iam_role_use_name_prefix = false
-      iam_role_additional_policies = {
-        secrets = aws_iam_policy.irsa_policy_eso.arn
-      }
     }
 
 
@@ -213,9 +209,10 @@ resource "aws_route53_record" "records" {
 
 
 #
-#
-#. TODO: use `output "secrets_policy_name"` to attach to the OIDC role created by irsa=true above.
-#
+# ESO - External Secrets Operator
+#. Creates a policy with access to secrets, 
+#.   a role granting assume permissions from cluster OIDC provider, and a policy attachment connecting them.
+#.   Service Accounts must specify the role's ARN to gain access. See platform repo's /secrets path
 
 resource "aws_iam_policy" "irsa_policy_eso" {
   name = "${var.primary_cluster_name}-irsa-policy-external-secrets"
@@ -233,7 +230,29 @@ resource "aws_iam_policy" "irsa_policy_eso" {
 
 }
 
-  #  resource "aws_iam_role_policy_attachment" "s3_read_only" {
-  #     role       = module.eks.oidc_provider_arn
-  #     policy_arn = data.terraform_remote_state.arad_aws_state.outputs.secrets_policy_arn
-  #   }
+resource "aws_iam_role" "eks_service_account_role" {
+  name = "${var.primary_cluster_name}-irsa-role-external-secrets"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}"
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        # Condition = {
+        #   StringEquals = {
+        #     "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:my-namespace:my-service-account"
+        #   }
+        # }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "irsa_secrets" {
+  role       = aws_iam_role.eks_service_account_role.name
+  policy_arn = aws_iam_policy.irsa_policy_eso.arn
+}
