@@ -14,3 +14,8 @@ output "demo_domain" {
 output "root_zone_id" {
     value = data.aws_route53_zone.root_demo_domain_zone.id
 }
+
+output "irsa_role_arn" {
+    # needed by SA setup by platform team
+  value = module.eks.eks_managed_node_groups.default.iam_role_arn
+}

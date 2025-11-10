@@ -4,7 +4,7 @@ module "vpc" {
 
   name = "${var.primary_cluster_name}-vpc"
   cidr = "10.0.0.0/16"
-  azs  = formatlist("${data.aws_region.current.name}%s", ["a", "b"])
+  azs  = formatlist("${data.aws_region.current.region}%s", ["a", "b"])
   #private_subnets      = ["10.0.1.0/24", "10.0.2.0/24"]
   public_subnets = ["10.0.4.0/24", "10.0.5.0/24"]
   #public_subnet_assign_
@@ -73,9 +73,14 @@ module "eks" {
       }
 
       iam_role_attach_cni_policy = true
-
-
+      #iam_role_use_name_prefix = false
+      iam_role_additional_policies = {
+        secrets = aws_iam_policy.irsa_policy_eso.arn
+      }
     }
+
+
+
   }
   # Allow kubectl access via AWS SSO credentials
   access_entries = {
@@ -212,7 +217,23 @@ resource "aws_route53_record" "records" {
 #. TODO: use `output "secrets_policy_name"` to attach to the OIDC role created by irsa=true above.
 #
 
-   resource "aws_iam_role_policy_attachment" "s3_read_only" {
-      role       = eks.module.oidc_provider_arn
-      policy_arn = data.terraform_remote_state.arad_aws_state.outputs.secrets_policy_arn
+resource "aws_iam_policy" "irsa_policy_eso" {
+  name = "${var.primary_cluster_name}-irsa-policy-external-secrets"
+
+  description = "Policy allowing ServiceAccount access to ESO."
+
+  policy = templatefile(
+    "${path.module}/templates/secrets_policy.json.tpl",
+    {
+      AWS_ACCOUNT_ID = data.aws_caller_identity.current.id,
     }
+  )
+
+  tags = var.common_tags
+
+}
+
+  #  resource "aws_iam_role_policy_attachment" "s3_read_only" {
+  #     role       = module.eks.oidc_provider_arn
+  #     policy_arn = data.terraform_remote_state.arad_aws_state.outputs.secrets_policy_arn
+  #   }
