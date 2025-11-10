@@ -205,3 +205,14 @@ resource "aws_route53_record" "records" {
   records    = [data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname]
   depends_on = [helm_release.nginx_ingress]
 }
+
+
+#
+#
+#. TODO: use `output "secrets_policy_name"` to attach to the OIDC role created by irsa=true above.
+#
+
+   resource "aws_iam_role_policy_attachment" "s3_read_only" {
+      role       = eks.module.oidc_provider_arn
+      policy_arn = data.terraform_remote_state.arad_aws_state.outputs.secrets_policy_arn
+    }
