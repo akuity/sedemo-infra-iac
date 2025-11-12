@@ -20,7 +20,7 @@ data "terraform_remote_state" "akuity_platform" {
 
 #debug
 output "argo_cd_url" {
-  value = data.terraform_remote_state.akuity_platform.outputs.argo_server_url
+  value = data.terraform_remote_state.akuity_platform.outputs.argo_custom_url
 }
 
 output "argo_cd_password" {
