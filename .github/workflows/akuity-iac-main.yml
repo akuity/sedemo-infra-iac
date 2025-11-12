@@ -18,6 +18,10 @@ jobs:
       AKUITY_API_KEY_ID: ${{ secrets.AKUITY_API_KEY_ID }}
       AKUITY_API_KEY_SECRET: ${{ secrets.AKUITY_API_KEY_SECRET }}
       TF_VAR_ARGO_ADMIN_PASSWORD: ${{ secrets.TF_VAR_ARGO_ADMIN_PASSWORD }}
+      TF_VAR_GH_OAUTH_CLIENT_ID: ${{ secrets.TF_VAR_GH_OAUTH_CLIENT_ID }}
+      TF_VAR_GH_OAUTH_CLIENT_SECRET: ${{ secrets.TF_VAR_GH_OAUTH_CLIENT_SECRET }}
+      TF_VAR_GH_OAUTH_CLIENT_ID_KARGO: ${{ secrets.TF_VAR_GH_OAUTH_CLIENT_ID_KARGO }}
+      TF_VAR_GH_OAUTH_CLIENT_SECRET_KARGO: ${{ secrets.TF_VAR_GH_OAUTH_CLIENT_SECRET_KARGO }}
     defaults:
       run:
         working-directory: akuity-bootstrap
