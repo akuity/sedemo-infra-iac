@@ -18,7 +18,7 @@ variable "akp_instance_name" {
 variable "akp_instance_version" {
   description = "The version of the AKP instance to create or update."
   type        = string
-  default     = "v3.1.8-ak.67"
+  default     = "v3.2.0-ak.70"
 }
 
 variable "kargo_instance_name" {
@@ -32,12 +32,6 @@ variable "kargo_instance_version" {
   type        = string
   default     = "v1.8.0-ak.0"
 }
-variable "kargo_agent_name" {
-  description = "The name of the Kargo agent to create or update."
-  type        = string
-  default     = "se-demo-kargo-agent"
-}
-
 
 variable "kargo_agent_size" {
   description = "Size of the Kargo agent"
@@ -49,4 +43,17 @@ variable "argo_admin_password" {
   description = "The password for the ArgoCD admin user."
   type        = string
   sensitive   = true
+}
+
+variable "GH_OAUTH_CLIENT_ID" {
+  sensitive = true
+}
+variable "GH_OAUTH_CLIENT_SECRET" {
+  sensitive = true
+}
+variable "GH_OAUTH_CLIENT_ID_KARGO" {
+  sensitive = true
+}
+variable "GH_OAUTH_CLIENT_SECRET_KARGO" {
+  sensitive = true
 }

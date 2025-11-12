@@ -5,6 +5,7 @@ resource "akp_instance" "se-demo-iac" {
   argocd = {
     "spec" = {
       "instance_spec" = {
+        fqdn                           = local.argo_custom_url
         declarative_management_enabled = true
         application_set_extension = {
           enabled = true
@@ -97,16 +98,32 @@ resource "akp_instance" "se-demo-iac" {
         metrics_ingress_password_hash = "passwordhash"
       }
 
-
       "version" = var.akp_instance_version
     }
   }
   argocd_cm = {
     "accounts.admin" = "login"
+    "dex.config"     = <<-EOF
+        connectors:
+          - type: github
+            id: github
+            name: GitHub
+            config:
+              clientID: ${var.GH_OAUTH_CLIENT_ID}
+              clientSecret: $dex.github.clientSecret
+              redirectURI: https://${local.argo_custom_url}/api/dex/callback
+              #orgs:
+              #- name: akuity
+              #preferredEmailDomain: "akuity.io"
+      EOF
+  }
+  argocd_rbac_cm = {
+    "policy.default" = "role:readonly" #grant GH login read-only access
   }
   # Set password for `admin` user.
   argocd_secret = {
-    "admin.password" = bcrypt(var.argo_admin_password)
+    "admin.password"          = bcrypt(var.argo_admin_password)
+    "dex.github.clientSecret" = var.GH_OAUTH_CLIENT_SECRET
   }
 }
 
@@ -116,7 +133,9 @@ resource "akp_kargo_instance" "kargo-instance" {
   workspace = "default"
   kargo = {
     spec = {
-      version = var.kargo_instance_version
+      version   = var.kargo_instance_version
+      fqdn      = local.kargo_custom_url
+      subdomain = "" #must be empty for fqdn 
       kargo_instance_spec = {
         gc_config = {
           max_retained_freight       = 20
@@ -127,6 +146,44 @@ resource "akp_kargo_instance" "kargo-instance" {
         global_credentials_ns = [
           "kargo-secrets-namespace"
         ]
+      }
+      oidc_config = {
+        enabled     = true
+        dex_enabled = true
+        dex_config  = <<-EOF
+        connectors:
+          - type: github
+            id: github
+            name: GitHub
+            config:
+              clientID: ${var.GH_OAUTH_CLIENT_ID_KARGO}
+              clientSecret: $GITHUB_CLIENT_SECRET
+              redirectURI: https://${local.kargo_custom_url}/api/dex/callback
+              #orgs:
+              #- name: akuity
+              #preferredEmailDomain: "akuity.io"
+        EOF
+        # this doesnt quite work
+        #dex_secret = {
+        #  GITHUB_CLIENT_SECRET = var.GH_OAUTH_CLIENT_SECRET_KARGO
+        #}
+        dex_config_secret = {
+          GITHUB_CLIENT_SECRET = var.GH_OAUTH_CLIENT_SECRET_KARGO
+        }
+        admin_account = {
+          claims = {
+            email = {
+              values = ["ollitech@gmail.com"]
+            }
+          }
+        }
+        viewer_account = {
+          claims = {
+            group = {
+              values = ["akuity:sales"]
+            }
+          }
+        }
       }
     }
   }
@@ -210,13 +267,24 @@ resource "akp_cluster" "kargo-cluster" {
   depends_on = [akp_kargo_instance.kargo-instance, akp_instance.se-demo-iac]
 }
 
-# resource "aws_route53_record" "records" {
+resource "aws_route53_record" "argo_custom_domain" {
 
-#   zone_id = data.terraform_remote_state.eks_clusters.outputs.root_zone_id
-#   name    = "argo.${data.terraform_remote_state.eks_clusters.outputs.demo_domain}"
-#   type    = "CNAME"
-#   ttl     = 5
+  zone_id = data.terraform_remote_state.eks_clusters.outputs.root_zone_id
+  name    = local.argo_custom_url
+  type    = "CNAME"
+  ttl     = 5
 
-#   records    = [outputs.argo_server_url]
-#   depends_on = [akp_instance.se-demo-iac]
-# }
+  records    = ["${akp_instance.se-demo-iac.id}.cd.akuity.cloud"]
+  depends_on = [akp_instance.se-demo-iac]
+}
+
+resource "aws_route53_record" "kargo_custom_domain" {
+
+  zone_id = data.terraform_remote_state.eks_clusters.outputs.root_zone_id
+  name    = local.kargo_custom_url
+  type    = "CNAME"
+  ttl     = 5
+
+  records    = ["${akp_kargo_instance.kargo-instance.id}.kargo.akuity.cloud"]
+  depends_on = [akp_instance.se-demo-iac]
+}

@@ -7,3 +7,8 @@ data "terraform_remote_state" "eks_clusters" {
     key    = "cluster-sedemo-primary/terraform.tfstate"
   }
 }
+
+locals {
+  kargo_custom_url = "kargo.${data.terraform_remote_state.eks_clusters.outputs.demo_domain}"
+  argo_custom_url  = "argo.${data.terraform_remote_state.eks_clusters.outputs.demo_domain}"
+}
