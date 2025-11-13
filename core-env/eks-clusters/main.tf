@@ -158,24 +158,59 @@ data "aws_route53_zone" "root_demo_domain_zone" {
   name = var.root_domain_name
 }
 
-resource "helm_release" "nginx_ingress" {
-  name             = "ingress-nginx"
-  repository       = "https://kubernetes.github.io/ingress-nginx"
-  chart            = "ingress-nginx"
+# resource "helm_release" "nginx_ingress" {
+#   name             = "ingress-nginx"
+#   repository       = "https://kubernetes.github.io/ingress-nginx"
+#   chart            = "ingress-nginx"
+#   create_namespace = true
+#   namespace        = var.ingress_namespace
+#   values = [
+#     file("${path.module}/nginx-helm/values.yaml")
+#   ]
+#   depends_on = [module.eks]
+# }
+
+# Manifest created per nginx docs using 
+# kubectl kustomize "https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard" > templates/gateway-api.yaml.tpl
+
+# Split single yaml file into multiple resources
+data "kubectl_path_documents" "docs" {
+  pattern = "${path.module}/templates/gateway-api.yaml.tpl"
+}
+resource "kubectl_manifest" "gateway_api_crds" {
+  for_each  = data.kubectl_path_documents.docs.manifests
+  yaml_body = each.value
+
+  depends_on = [module.eks]
+}
+
+#
+# nginx repo has requirement to login
+# echo "$GH_PAT" | helm registry login ghcr.io -u USERNAME --password-stdin
+resource "helm_release" "nginx_gateway_fabric" {
+  name             = "nginx-gateway"
+  repository       = "oci://ghcr.io/nginx/charts/"
+  chart            = "nginx-gateway-fabric"
   create_namespace = true
-  namespace        = var.ingress_namespace
-  values = [
-    file("${path.module}/nginx-helm/values.yaml")
-  ]
+  namespace        = "nginx-gateway"
+  depends_on       = [module.eks, kubectl_manifest.gateway_api_crds]
+}
+
+
+resource "kubectl_manifest" "demo_gateway" {
+  yaml_body = file(
+    "${path.module}/templates/nginx-gateway.yaml"
+  )
+
   depends_on = [module.eks]
 }
 
 # the helm chart above will implore AWS to create an ELB. We'll need it's name for the A record below.
-data "aws_elb" "nginx_ingress" {
-  name = substr(data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname, 0, 32)
+data "aws_elb" "demo_gateway" {
+  name = substr(data.kubernetes_service_v1.demo_gateway.status.0.load_balancer.0.ingress.0.hostname, 0, 32)
 
   depends_on = [
-    helm_release.nginx_ingress
+    kubectl_manifest.demo_gateway
   ]
 }
 
@@ -186,8 +221,8 @@ resource "aws_route53_record" "landing_global_record" {
 
   # Using alias gives us health checks without explicit definition of 'HealthCheck'
   alias {
-    name                   = data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname
-    zone_id                = data.aws_elb.nginx_ingress.zone_id
+    name                   = data.kubernetes_service_v1.demo_gateway.status.0.load_balancer.0.ingress.0.hostname
+    zone_id                = data.aws_elb.demo_gateway.zone_id
     evaluate_target_health = true
   }
 
@@ -197,7 +232,7 @@ resource "aws_route53_record" "landing_global_record" {
 
   set_identifier = var.primary_cluster_name
 
-  depends_on = [helm_release.nginx_ingress]
+  depends_on = [kubectl_manifest.demo_gateway]
 }
 
 resource "aws_route53_record" "records" {
@@ -210,8 +245,8 @@ resource "aws_route53_record" "records" {
   type    = "CNAME"
   ttl     = 5
 
-  records    = [data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname]
-  depends_on = [helm_release.nginx_ingress]
+  records    = [data.kubernetes_service_v1.demo_gateway.status.0.load_balancer.0.ingress.0.hostname]
+  depends_on = [kubectl_manifest.demo_gateway]
 }
 
 

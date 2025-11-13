@@ -8,14 +8,14 @@ data "terraform_remote_state" "arad_aws_state" {
   }
 }
 
-data "kubernetes_service_v1" "nginx_ingress" {
+data "kubernetes_service_v1" "demo_gateway" {
   metadata {
-    name      = "ingress-nginx-controller"
-    namespace = var.ingress_namespace
+    name      = "gateway-nginx"
+    namespace = "nginx-gateway"
   }
 
   depends_on = [
-    helm_release.nginx_ingress
+    kubectl_manifest.demo_gateway
   ]
 }
 
