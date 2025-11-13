@@ -3,19 +3,26 @@ kind: Gateway
 metadata:
   name: gateway
   namespace: nginx-gateway
-  annotations: # This is the name of the ClusterIssuer created in the previous step
+  annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   gatewayClassName: nginx
   listeners:
   - name: http
+    hostname: "akpdemoapps.link"
     port: 80
     protocol: HTTP
+    allowedRoutes:
+      namespaces: 
+        from: All
   - name: https
     # Important: The hostname needs to be set to your domain
-    hostname: "*.akpdemoapps.link"
+    hostname: "akpdemoapps.link"
     port: 443
     protocol: HTTPS
+    allowedRoutes:
+      namespaces: 
+        from: All
     tls:
       mode: Terminate
       certificateRefs:
