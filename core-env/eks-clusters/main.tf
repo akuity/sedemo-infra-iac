@@ -131,7 +131,7 @@ module "eks" {
     }
     # IT assigned SSO role
     sso_admin_access = {
-      principal_arn = "arn:aws:iam::218691292270:role/aws-reserved/sso.amazonaws.com/us-east-2/AWSReservedSSO_AdministratorAccess_e2e980dbad09a8b6"
+      principal_arn = "arn:aws:iam::218691292270:role/aws-reserved/sso.amazonaws.com/us-east-2/AWSReservedSSO_PowerUserAccess_8de5f1934424d9c6"
       policy_associations = {
         admin_policy = {
           ### https://docs.aws.amazon.com/eks/latest/userguide/access-policies.html
