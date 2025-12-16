@@ -112,13 +112,16 @@ resource "akp_instance" "se-demo-iac" {
               clientID: ${var.GH_OAUTH_CLIENT_ID}
               clientSecret: $dex.github.clientSecret
               redirectURI: https://${local.argo_custom_url}/api/dex/callback
-              #orgs:
-              #- name: akuity
+              orgs:
+              - name: akuity
               #preferredEmailDomain: "akuity.io"
       EOF
   }
   argocd_rbac_cm = {
-    "policy.default" = "role:readonly" #grant GH login read-only access
+    "policy.default" = <<-EOF
+      p, role:org-admin, *,*, */*, allow
+      g, akuity:demo, role:org-admin
+      EOF
   }
   # Set password for `admin` user.
   argocd_secret = {
@@ -159,8 +162,8 @@ resource "akp_kargo_instance" "kargo-instance" {
               clientID: ${var.GH_OAUTH_CLIENT_ID_KARGO}
               clientSecret: $GITHUB_CLIENT_SECRET
               redirectURI: https://${local.kargo_custom_url}/api/dex/callback
-              #orgs:
-              #- name: akuity
+              orgs:
+              - name: akuity
               #preferredEmailDomain: "akuity.io"
         EOF
         # this doesnt quite work
@@ -172,8 +175,8 @@ resource "akp_kargo_instance" "kargo-instance" {
         }
         admin_account = {
           claims = {
-            email = {
-              values = ["ollitech@gmail.com"]
+            groups = {
+              values = ["akuity:demo"]
             }
           }
         }

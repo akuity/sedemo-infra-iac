@@ -7,10 +7,7 @@ resource "argocd_project" "projects" {
 
   spec {
     description = each.value.description
-
     source_repos = ["*"]
-
-
     dynamic "destination" {
       for_each = each.value.destinations
       iterator = DESTINATION
@@ -20,7 +17,6 @@ resource "argocd_project" "projects" {
         server    = "*"
       }
     }
-
     dynamic "cluster_resource_whitelist" {
       for_each = each.value.cluster-allows
       iterator = ALLOW
@@ -59,6 +55,8 @@ resource "argocd_application" "app-of-apps" {
       }
     }
 
+    ignoreApplicationDifferences {
+      jsonPointers = ["/spec/syncPolicy"]
     # sync_policy {
     #   automated {
     #     prune     = true
