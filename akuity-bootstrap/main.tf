@@ -114,14 +114,18 @@ resource "akp_instance" "se-demo-iac" {
               redirectURI: https://${local.argo_custom_url}/api/dex/callback
               orgs:
               - name: akuity
+              - name: akuityio
               #preferredEmailDomain: "akuity.io"
       EOF
   }
   argocd_rbac_cm = {
-    "policy.default" = <<-EOF
+    "policy.csv" = <<-EOF
       p, role:org-admin, *,*, */*, allow
-      g, akuity:demo, role:org-admin
+      p, role:sales-team, *, get, */*, allow
+      g, akuity:sedemo, role:org-admin
+      g, akuityio:sales, role:sales-team
       EOF
+    "policy.default" = "role:readonly"
   }
   # Set password for `admin` user.
   argocd_secret = {
@@ -164,6 +168,7 @@ resource "akp_kargo_instance" "kargo-instance" {
               redirectURI: https://${local.kargo_custom_url}/api/dex/callback
               orgs:
               - name: akuity
+              - name: akuityio
               #preferredEmailDomain: "akuity.io"
         EOF
         # this doesnt quite work
@@ -176,14 +181,14 @@ resource "akp_kargo_instance" "kargo-instance" {
         admin_account = {
           claims = {
             groups = {
-              values = ["akuity:demo"]
+              values = ["akuity:sedemo"]
             }
           }
         }
         viewer_account = {
           claims = {
-            group = {
-              values = ["akuity:sales"]
+            groups = {
+              values = ["akuityio:sales"]
             }
           }
         }
