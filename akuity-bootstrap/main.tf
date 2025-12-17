@@ -119,7 +119,7 @@ resource "akp_instance" "se-demo-iac" {
       EOF
   }
   argocd_rbac_cm = {
-    "policy.csv" = <<-EOF
+    "policy.csv"     = <<-EOF
       p, role:org-admin, *,*, */*, allow
       p, role:sales-team, *, get, */*, allow
       g, akuity:sedemo, role:org-admin
