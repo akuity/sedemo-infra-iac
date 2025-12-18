@@ -94,7 +94,7 @@ variable "project_spaces" {
         kind  = "*"
       }]
     }
-    "templated" = {
+    "templated-apps" = {
       "name"        = "templated-apps"
       "description" = "build from git generator"
       "destinations" = [{
