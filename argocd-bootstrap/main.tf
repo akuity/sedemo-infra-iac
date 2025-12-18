@@ -6,7 +6,7 @@ resource "argocd_project" "projects" {
   }
 
   spec {
-    description = each.value.description
+    description  = each.value.description
     source_repos = ["*"]
     dynamic "destination" {
       for_each = each.value.destinations
@@ -57,15 +57,15 @@ resource "argocd_application" "app-of-apps" {
 
     ignoreApplicationDifferences {
       jsonPointers = ["/spec/syncPolicy"]
-    # sync_policy {
-    #   automated {
-    #     prune     = true
-    #     self_heal = true
+      # sync_policy {
+      #   automated {
+      #     prune     = true
+      #     self_heal = true
 
-    #   }
-    # }
+      #   }
+      # }
     }
-  depends_on = [argocd_project.projects]
+    depends_on = [argocd_project.projects]
   }
 }
 
