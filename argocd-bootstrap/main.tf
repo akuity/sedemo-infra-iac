@@ -54,17 +54,6 @@ resource "argocd_application" "app-of-apps" {
         recurse = var.source_directory_recursive
       }
     }
-
-    ignoreApplicationDifferences {
-      jsonPointers = ["/spec/syncPolicy"]
-      # sync_policy {
-      #   automated {
-      #     prune     = true
-      #     self_heal = true
-
-      #   }
-      # }
-    }
   }
   depends_on = [argocd_project.projects]
 }
