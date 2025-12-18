@@ -64,9 +64,9 @@ resource "argocd_application" "app-of-apps" {
 
     #   }
     # }
-  }
+    }
   depends_on = [argocd_project.projects]
-
+  }
 }
 
 
