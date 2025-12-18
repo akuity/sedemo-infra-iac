@@ -92,14 +92,34 @@ resource "argocd_application" "app-of-components" {
         recurse = var.source_directory_recursive
       }
     }
+  }
+  depends_on = [argocd_project.projects]
 
-    # sync_policy {
-    #   automated {
-    #     prune     = true
-    #     self_heal = true
+}
 
-    #   }
-    # }
+
+resource "argocd_application" "templated-apps" {
+  metadata {
+    name      = "templated-apps"
+    namespace = "argocd"
+    labels = {
+      cluster = "in-cluster"
+    }
+  }
+
+  spec {
+    destination {
+      name = "in-cluster"
+    }
+    project = "templated-apps"
+
+    source {
+      repo_url = var.source_repo_url
+      path     = "templated_teams"
+      directory {
+        recurse = false
+      }
+    }
   }
   depends_on = [argocd_project.projects]
 

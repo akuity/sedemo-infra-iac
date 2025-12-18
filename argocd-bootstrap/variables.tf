@@ -94,5 +94,17 @@ variable "project_spaces" {
         kind  = "*"
       }]
     }
+    "templated" = {
+      "name"        = "templated-apps"
+      "description" = "build from git generator"
+      "destinations" = [{
+        name      = "*"
+        namespace = "*"
+      }]
+      "cluster-allows" = [{
+        group = "*"
+        kind  = "*"
+      }]
+    }
   }
 }
