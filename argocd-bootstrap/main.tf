@@ -87,7 +87,7 @@ resource "argocd_application" "app-of-components" {
 
     source {
       repo_url = var.source_repo_url
-      path     = "components"
+      path     = "components/declarations"
       directory {
         recurse = var.source_directory_recursive
       }
