@@ -104,7 +104,7 @@ resource "argocd_application" "templated-apps" {
 
     source {
       repo_url = var.source_repo_url
-      path     = "templated_teams"
+      path     = "templated-teams"
       directory {
         recurse = false
       }
