@@ -224,7 +224,7 @@ resource "akp_kargo_agent" "kargo-agent" {
       remote_argocd  = akp_instance.se-demo-iac.id # pulled from resource above
       # This section customizes the Kargo controller to use a specific namespace for global credentials
       # That namespace contains our secrets created by ESO (see platform repo)
-      kustomization         = <<-EOT
+      kustomization = <<-EOT
       apiVersion: kustomize.config.k8s.io/v1beta1
       kind: Kustomization
       resources:
