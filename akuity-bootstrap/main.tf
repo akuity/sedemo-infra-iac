@@ -222,13 +222,32 @@ resource "akp_kargo_agent" "kargo-agent" {
       size           = var.kargo_agent_size
       akuity_managed = true
       remote_argocd  = akp_instance.se-demo-iac.id # pulled from resource above
+    }
+  }
+  depends_on = [akp_kargo_instance.kargo-instance]
+}
+
+import {
+  to = akp_kargo_agent.local-kargo-agent
+  id = "${akp_kargo_instance.kargo-instance.id}/sedemo-primary"
+}
+
+resource "akp_kargo_agent" "local-kargo-agent" {
+  instance_id = akp_kargo_instance.kargo-instance.id
+  workspace   = "default"
+  name        = "sedemo-primary"
+  namespace   = "akuity"
+  spec = {
+    description = "local iac managed kargo agent for SE Team demos"
+    data = {
+      size           = var.kargo_agent_size
+      akuity_managed = false
+      remote_argocd  = akp_instance.se-demo-iac.id # pulled from resource above
       # This section customizes the Kargo controller to use a specific namespace for global credentials
       # That namespace contains our secrets created by ESO (see platform repo)
       kustomization = <<-EOT
       apiVersion: kustomize.config.k8s.io/v1beta1
       kind: Kustomization
-      resources:
-        - cm.yaml
       patches:
       - patch: |-
           - op: replace
@@ -237,11 +256,14 @@ resource "akp_kargo_agent" "kargo-agent" {
         target:
           kind: ConfigMap
           name: kargo-controller
+      resources:
+      - cm.yaml
       EOT
     }
   }
   depends_on = [akp_kargo_instance.kargo-instance]
 }
+
 
 
 
