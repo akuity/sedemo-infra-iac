@@ -227,10 +227,10 @@ resource "akp_kargo_agent" "kargo-agent" {
   depends_on = [akp_kargo_instance.kargo-instance]
 }
 
-import {
-  to = akp_kargo_agent.local-kargo-agent
-  id = "${akp_kargo_instance.kargo-instance.id}/sedemo-primary"
-}
+# import {
+#   to = akp_kargo_agent.local-kargo-agent
+#   id = "${akp_kargo_instance.kargo-instance.id}/sedemo-primary"
+# }
 
 resource "akp_kargo_agent" "local-kargo-agent" {
   instance_id = akp_kargo_instance.kargo-instance.id
