@@ -120,7 +120,7 @@ resource "akp_instance" "se-demo-iac" {
       EOF
   }
   argocd_rbac_cm = {
-    "policy.csv"     = <<-EOF
+    "policy.csv" = <<-EOF
       # grant platform-team full access, including platform provided read-only base permissions
       p, role:platform-team, *,*, */*, allow
       g, role:platform-team, role:readonly
