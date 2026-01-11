@@ -129,7 +129,6 @@ resource "akp_instance" "se-demo-iac" {
       # grant auditor-role to  readonly role
       g, sedemo-auditor, role:readonly
       EOF
-    "policy.default" = "role:readonly"
   }
   # Set password for `admin` user.
   argocd_secret = {
