@@ -45,15 +45,14 @@ variable "argo_admin_password" {
   sensitive   = true
 }
 
-variable "GH_OAUTH_CLIENT_ID" {
+variable "MS_OAUTH_CLIENT_ID" {
   sensitive = true
 }
-variable "GH_OAUTH_CLIENT_SECRET" {
+
+variable "MS_OAUTH_CLIENT_SECRET" {
   sensitive = true
 }
-variable "GH_OAUTH_CLIENT_ID_KARGO" {
-  sensitive = true
-}
-variable "GH_OAUTH_CLIENT_SECRET_KARGO" {
+
+variable "MS_OAUTH_TENANT_ID" {
   sensitive = true
 }

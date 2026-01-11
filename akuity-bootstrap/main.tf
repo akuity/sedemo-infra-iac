@@ -104,33 +104,37 @@ resource "akp_instance" "se-demo-iac" {
   argocd_cm = {
     "accounts.admin" = "login"
     "dex.config"     = <<-EOF
-        connectors:
-          - type: github
-            id: github
-            name: GitHub
-            config:
-              clientID: ${var.GH_OAUTH_CLIENT_ID}
-              clientSecret: $dex.github.clientSecret
-              redirectURI: https://${local.argo_custom_url}/api/dex/callback
-              orgs:
-              - name: akuity
-              - name: akuityio
-              #preferredEmailDomain: "akuity.io"
+      connectors:
+      - type: microsoft
+        # Required field for connector id.
+        id: microsoft
+        # Required field for connector name.
+        name: Microsoft
+        config:
+          # client ID is for the OAuth application registered in Azure AD, not the id of the secret.
+          clientID: ${var.MS_OAUTH_CLIENT_ID}
+          # value of a secret created in Azure AD for the OAuth application.
+          clientSecret: $dex.microsoft.clientSecret
+          redirectURI: https://${local.argo_custom_url}/api/dex/callback
+          tenant: ${var.MS_OAUTH_TENANT_ID}
       EOF
   }
   argocd_rbac_cm = {
     "policy.csv"     = <<-EOF
-      p, role:org-admin, *,*, */*, allow
-      p, role:sales-team, *, get, */*, allow
-      g, akuity:sedemo, role:org-admin
-      g, akuityio:sales, role:sales-team
+      # grant platform-team full access, including platform provided read-only base permissions
+      p, role:platform-team, *,*, */*, allow
+      g, role:platform-team, role:readonly
+      # map platform-team group to platform-team role
+      g, sedemo-admin, role:platform-team
+      # grant auditor-role to  readonly role
+      g, sedemo-auditor, role:readonly
       EOF
     "policy.default" = "role:readonly"
   }
   # Set password for `admin` user.
   argocd_secret = {
-    "admin.password"          = bcrypt(var.argo_admin_password)
-    "dex.github.clientSecret" = var.GH_OAUTH_CLIENT_SECRET
+    "admin.password"             = bcrypt(var.argo_admin_password)
+    "dex.microsoft.clientSecret" = var.MS_OAUTH_CLIENT_SECRET
   }
 }
 
@@ -159,38 +163,43 @@ resource "akp_kargo_instance" "kargo-instance" {
         dex_enabled = true
         dex_config  = <<-EOF
         connectors:
-          - type: github
-            id: github
-            name: GitHub
-            config:
-              clientID: ${var.GH_OAUTH_CLIENT_ID_KARGO}
-              clientSecret: $GITHUB_CLIENT_SECRET
-              redirectURI: https://${local.kargo_custom_url}/api/dex/callback
-              orgs:
-              - name: akuity
-              - name: akuityio
-              #preferredEmailDomain: "akuity.io"
+        - type: microsoft
+          # Required field for connector id.
+          id: microsoft
+          # Required field for connector name.
+          name: Microsoft
+          config:
+            # client ID is for the OAuth application registered in Azure AD, not the id of the secret.
+            clientID: ${var.MS_OAUTH_CLIENT_ID}
+            # value of a secret created in Azure AD for the OAuth application.
+            clientSecret: $microsoftClientSecret
+            redirectURI: https://${local.kargo_custom_url}/api/dex/callback
+            tenant: ${var.MS_OAUTH_TENANT_ID}
         EOF
         # this doesnt quite work
         #dex_secret = {
         #  GITHUB_CLIENT_SECRET = var.GH_OAUTH_CLIENT_SECRET_KARGO
         #}
         dex_config_secret = {
-          GITHUB_CLIENT_SECRET = var.GH_OAUTH_CLIENT_SECRET_KARGO
+          "dex.microsoft.clientSecret" = var.MS_OAUTH_CLIENT_SECRET
         }
         admin_account = {
           claims = {
             groups = {
-              values = ["akuity:sedemo"]
+              values = ["sedemo-admin"]
             }
           }
         }
         viewer_account = {
           claims = {
             groups = {
-              values = ["akuityio:sales"]
+              values = ["sedemo-auditor"]
             }
           }
+        }
+        user_account = {
+        }
+        project_creator_account = {
         }
       }
     }
