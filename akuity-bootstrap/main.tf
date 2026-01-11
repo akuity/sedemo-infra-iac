@@ -172,8 +172,8 @@ resource "akp_kargo_instance" "kargo-instance" {
             # client ID is for the OAuth application registered in Azure AD, not the id of the secret.
             clientID: ${var.MS_OAUTH_CLIENT_ID}
             # value of a secret created in Azure AD for the OAuth application.
-            clientSecret: $microsoftClientSecret
-            redirectURI: https://${local.kargo_custom_url}/api/dex/callback
+            clientSecret: '$msClientSecret'
+            redirectURI: https://${local.kargo_custom_url}/dex/callback
             tenant: ${var.MS_OAUTH_TENANT_ID}
         EOF
         # this doesnt quite work
@@ -181,7 +181,7 @@ resource "akp_kargo_instance" "kargo-instance" {
         #  GITHUB_CLIENT_SECRET = var.GH_OAUTH_CLIENT_SECRET_KARGO
         #}
         dex_config_secret = {
-          "dex.microsoft.clientSecret" = var.MS_OAUTH_CLIENT_SECRET
+          "msClientSecret" = var.MS_OAUTH_CLIENT_SECRET
         }
         admin_account = {
           claims = {
@@ -198,8 +198,18 @@ resource "akp_kargo_instance" "kargo-instance" {
           }
         }
         user_account = {
+          claims = {
+            groups = {
+              values = ["sedemo-auditor"]
+            }
+          }
         }
         project_creator_account = {
+          claims = {
+            groups = {
+              values = ["sedemo-auditor"]
+            }
+          }
         }
       }
     }
