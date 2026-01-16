@@ -3,6 +3,15 @@
   "Statement": [
     {
       "Action" : [
+        "s3:CreateBucket",
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Effect" : "Allow",
+      "Resource" : "*"
+    },
+    {
+      "Action" : [
         "secretsmanager:ListSecrets",
         "secretsmanager:BatchGetSecretValue"
       ],
