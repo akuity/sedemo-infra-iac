@@ -191,23 +191,17 @@ resource "akp_kargo_instance" "kargo-instance" {
         }
         viewer_account = {
           claims = {
-            groups = {
-              values = ["sedemo-auditor"]
-            }
           }
         }
         user_account = {
           claims = {
             groups = {
-              values = ["sedemo-auditor"]
+              values = ["sedemo-user"]
             }
           }
         }
         project_creator_account = {
           claims = {
-            groups = {
-              values = ["sedemo-auditor"]
-            }
           }
         }
       }
