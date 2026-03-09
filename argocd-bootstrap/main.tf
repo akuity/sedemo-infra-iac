@@ -114,7 +114,7 @@ resource "argocd_application" "templated-apps" {
 }
 
 
-resource "argocd_application" "templated-apps" {
+resource "argocd_application" "akuity-lab" {
   metadata {
     name      = "akuity-lab"
     namespace = "argocd"
