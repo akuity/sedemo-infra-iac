@@ -106,5 +106,17 @@ variable "project_spaces" {
         kind  = "*"
       }]
     }
+    "akuity-lab" = {
+      "name"        = "akuity-lab"
+      "description" = "Akuity Lab applications"
+      "destinations" = [{
+        name      = "*"
+        namespace = "*"
+      }]
+      "cluster-allows" = [{
+        group = "*"
+        kind  = "*"
+      }]
+    }
   }
 }

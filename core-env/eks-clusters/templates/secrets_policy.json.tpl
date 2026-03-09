@@ -27,7 +27,7 @@
         "secretsmanager:ListSecretVersionIds"
       ],
       "Resource": [
-        "arn:aws:secretsmanager:us-west-2:${AWS_ACCOUNT_ID}:secret:kargo-*"
+        "arn:aws:secretsmanager:us-west-2:${AWS_ACCOUNT_ID}:secret:*"
       ]
     }
   ]

@@ -196,7 +196,7 @@ resource "akp_kargo_instance" "kargo-instance" {
         user_account = {
           claims = {
             groups = {
-              values = ["sedemo-user"]
+              values = ["sedemo-user", "Akuity"]
             }
           }
         }
@@ -213,6 +213,9 @@ resource "akp_kargo_instance" "kargo-instance" {
   }
   kargo_secret = {
     adminAccountPasswordHash = bcrypt(var.argo_admin_password)
+  }
+  lifecycle {
+    ignore_changes = [kargo.spec.version]
   }
 }
 
@@ -293,7 +296,6 @@ resource "akp_cluster" "eks-cluster" {
         AWS_REGION = "us-west-2"
       }
     }
-
   }
 
   name      = data.terraform_remote_state.eks_clusters.outputs.primary_cluster_name
