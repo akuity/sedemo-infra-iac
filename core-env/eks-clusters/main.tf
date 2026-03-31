@@ -263,3 +263,39 @@ resource "aws_iam_role_policy_attachment" "irsa_secrets" {
   role       = aws_iam_role.eks_service_account_role.name
   policy_arn = aws_iam_policy.irsa_policy_eso.arn
 }
+
+
+
+
+# resource "aws_iam_role" "eks_service_account_role_for_kargo_steps" {
+#   name = "${var.primary_cluster_name}-irsa-role-kargo-steps"
+
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Effect = "Allow"
+#         Principal = {
+#           Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}"
+#         }
+#         Action = "sts:AssumeRoleWithWebIdentity"
+#         Condition = {
+#           StringLike = {
+#             "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:aud" = "sts.amazonaws.com",
+#             "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:akuity:*",
+            
+#           }
+#         }
+#       }
+#     ]
+#   })
+# }
+
+
+# resource "aws_iam_role_policy_attachment" "irsa_kargo_steps" {
+#   role       = aws_iam_role.eks_service_account_role_for_kargo_steps.name
+#   policy_arn = aws_iam_policy.irsa_policy_eso.arn
+# }
+
+
+# arn:aws:sts::218691292270:assumed-role/default-eks-node-group-20251111192150921200000002/i-0121fb11f5ec3bd40
