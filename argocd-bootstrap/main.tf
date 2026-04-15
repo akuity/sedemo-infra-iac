@@ -32,7 +32,7 @@ resource "argocd_project" "projects" {
 
 
 
-# Our app of apps that bootstraps the Platform team's setup.
+# Bootstraps both the ArgoCD and Kargo ApplicationSets that discover apps/*/argocd/ and apps/*/kargo/.
 resource "argocd_application" "app-of-apps" {
   metadata {
     name      = "app-of-apps"
@@ -49,9 +49,9 @@ resource "argocd_application" "app-of-apps" {
 
     source {
       repo_url = var.source_repo_url
-      path     = var.source_directory_path
+      path     = "bootstrap"
       directory {
-        recurse = var.source_directory_recursive
+        recurse = false
       }
     }
   }
@@ -141,37 +141,3 @@ resource "argocd_application" "akuity-lab" {
 }
 
 
-resource "argocd_application" "app-of-kargo" {
-  metadata {
-    name      = "app-of-kargo"
-    namespace = "argocd"
-    labels = {
-      cluster = "in-cluster"
-    }
-  }
-
-  spec {
-    destination {
-      name = "in-cluster"
-    }
-    project = "kargo"
-
-    source {
-      repo_url = var.source_repo_url
-      path     = "kargo"
-      directory {
-        recurse = false
-      }
-    }
-
-    # sync_policy {
-    #   automated {
-    #     prune     = true
-    #     self_heal = true
-
-    #   }
-    # }
-  }
-
-  depends_on = [argocd_project.projects]
-}
