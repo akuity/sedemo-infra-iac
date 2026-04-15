@@ -18,7 +18,7 @@ variable "akp_instance_name" {
 variable "akp_instance_version" {
   description = "The version of the AKP instance to create or update."
   type        = string
-  default     = "v3.2.6-ak.75"
+  default     = "v3.3.6-ak.79"
 }
 
 variable "kargo_instance_name" {
@@ -30,7 +30,7 @@ variable "kargo_instance_name" {
 variable "kargo_instance_version" {
   description = "The version of the Kargo instance to create or update."
   type        = string
-  default     = "v1.8.4-ak.2"
+  default     = "v1.10.0-rc.2"
 }
 
 variable "kargo_agent_size" {
