@@ -147,6 +147,7 @@ resource "akp_kargo_instance" "kargo-instance" {
       fqdn      = local.kargo_custom_url
       subdomain = "" #must be empty for fqdn 
       kargo_instance_spec = {
+        default_shard_agent = "" # explicitly clear stale agent reference
         gc_config = {
           max_retained_freight       = 20
           max_retained_promotions    = 20
