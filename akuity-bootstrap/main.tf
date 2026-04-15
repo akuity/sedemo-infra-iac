@@ -235,6 +235,7 @@ resource "akp_kargo_agent" "kargo-agent" {
   spec = {
     description = "iac managed kargo agent for SE Team demos"
     data = {
+      size           = var.kargo_agent_size
       akuity_managed = true
       remote_argocd  = akp_instance.se-demo-iac.id # pulled from resource above
     }
