@@ -221,27 +221,27 @@ resource "akp_kargo_instance" "kargo-instance" {
 }
 
 
-resource "akp_kargo_agent" "kargo-agent" {
-  instance_id = akp_kargo_instance.kargo-instance.id
-  workspace   = "default"
-  name        = "default"
-  namespace   = "kargo"
-  labels = {
-    "app" = "kargo"
-  }
-  annotations = {
-    "app" = "kargo"
-  }
-  spec = {
-    description = "iac managed kargo agent for SE Team demos"
-    data = {
-      size           = var.kargo_agent_size
-      akuity_managed = true
-      remote_argocd  = akp_instance.se-demo-iac.id # pulled from resource above
-    }
-  }
-  depends_on = [akp_kargo_instance.kargo-instance]
-}
+# resource "akp_kargo_agent" "kargo-agent" {
+#   instance_id = akp_kargo_instance.kargo-instance.id
+#   workspace   = "default"
+#   name        = "default"
+#   namespace   = "kargo"
+#   labels = {
+#     "app" = "kargo"
+#   }
+#   annotations = {
+#     "app" = "kargo"
+#   }
+#   spec = {
+#     description = "iac managed kargo agent for SE Team demos"
+#     data = {
+#       size           = var.kargo_agent_size
+#       akuity_managed = true
+#       remote_argocd  = akp_instance.se-demo-iac.id
+#     }
+#   }
+#   depends_on = [akp_kargo_instance.kargo-instance]
+# }
 
 # import {
 #   to = akp_kargo_agent.local-kargo-agent
