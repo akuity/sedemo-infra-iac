@@ -12,14 +12,13 @@ It logically represents the "base" layer often controlled by infrastructure team
 - `akuity-bootstrap` requires an existing Akuity Org and API key with admin rights. The terraform module will:
   - provision an AKP instance (Enterprise ArgoCD) with Akuity Intelligence & AI Powered Runbooks enabled
   - provision an Enterprise Kargo instance
-  - register the Kargo instance (cluster) to the ArgoCD instance so we can GitOps kargo config
-  - Install a Kargo agent with access to the above ArgoCD instance so it can notify and monitor ArgoCD progress
-  - install Akuity's ArgoCD agent in the EKS cluster from above
-  - Install Akuity's Kargo agent in the EKS cluster from above
-- `argocd-bootstrap` creates a handful of 'projects' and seeds them with app-of-app configuration pointint to platform team repos.
+  - register the Kargo instance (cluster) to the ArgoCD instance so we can GitOps Kargo config
+  - install a self-managed Kargo agent (`sedemo-primary`) in the EKS cluster with access to the ArgoCD instance
+  - install Akuity's ArgoCD agent in the EKS cluster
+  - create the top-level `app-of-apps` ArgoCD Application pointing to `bootstrap/` in the platform repo
+- `argocd-bootstrap` creates ArgoCD projects and seeds the `app-of-apps` configuration pointing to the platform repo.
    - `components` cluster add-ons like prometheus, metrics-server, and external-secrets
-   - `apps` the sample application representing business workloads
-   - `kargo` the project and workflow definitions for Kargo
+   - `apps` the sample applications representing business workloads
    - `secrets` External-Secrets manager `SecretStores` connected to AWS Secrets Manager, used by Kargo
 
 
