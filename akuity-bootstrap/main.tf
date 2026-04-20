@@ -41,23 +41,51 @@ resource "akp_instance" "se-demo-iac" {
             {
               name    = "oom"
               content = <<-EOF
-                  ## General
+                # OOM-Killed Runbook
 
-                  - First, do the initial triage and collect the basic information to understand the incident.
-                  - Next, work on the incident according to the runbook. Don't apply any patches automatically, ask for approval.
-                  - If the app is stable, check 30 seconds later again, then you can close the incident automatically.
+                ## Procedure
 
-                  ## Out of memory
+                Follow these steps precisely.
 
-                  **Symptoms**: Pod unexpectedly dies with \`OOMKilled\` status.
+                ### Triage the Incident
+                - First, do the initial triage and collect the basic information to understand the incident.
+                - Next, send a single Slack notification with the link to the conversation to channel "#incidents" and a formatted summary of the incident details. 
 
-                  **Root cause**: The pod is consuming more memory than the available memory.
+                ### Plan Remediation
+                - Next, devise a plan to remediate the incident according to the runbook actions defined. Don't apply any patches automatically.
+                - Send a single Slack notification with your findings and planned remediation. Ask for approval before proceeding.
+                - "After summarizing findings, always send the proposed remediation and approval prompt to the same Slack thread where triage notification was posted."
 
-                  **Solution**:
+                ### Take Action
+                - Once approval is provided, proceed applying the planned remediation.
+                - Monitor the result of your remediation.
 
-                  * Temporary increase the memory limit of the pod automatically
-                  * Increase the memory limit with the 50 Mb increment until the pod is stable.
-                EOF
+                ### Resolve Incident
+                - If the app is stable, then you can close the incident automatically. You do not need confirmtation to close the incident.
+
+                ## General Guidance
+
+                - If you get stuck, send a Slack message again and mention that you need help.
+                - Please ensure you send Slack message with the link to the conversation, so engineer can work with you together if needed.
+                - You do not need to include every thought when sending to slack, only send summaries or when prompting for user action. 
+                - "After summarizing findings, always send the proposed remediation and approval prompt to the same Slack thread where triage notification was posted.This should be it's own message to ensure prompt user attention."
+
+                ## Action: Out of memory
+
+                **Symptoms**: 
+                - Pod unexpectedly dies with \`OOMKilled\` status.
+                - Pod stuck in CrashLoopBackOff status
+                - Frequent OOM kills (Out of Memory) in logs
+                - Deployment or pod status "Degraded", "Exceeded progress deadline"
+
+                **Root cause**: The pod is consuming more memory than the available memory.
+
+                **Solution**:
+
+                * Temporary increase the memory limit of the pod automatically
+                * Increase the memory limit with the 50 Mb increment until the pod is stable.
+                * Once stable, resolve the incident
+              EOF
               applied_to = {
                 argocd_applications = ["oom-*"]
                 k8s_namespaces      = ["*"]
@@ -134,6 +162,13 @@ resource "akp_instance" "se-demo-iac" {
   argocd_secret = {
     "admin.password"             = bcrypt(var.argo_admin_password)
     "dex.microsoft.clientSecret" = var.MS_OAUTH_CLIENT_SECRET
+  }
+  lifecycle {
+    ignore_changes = [
+      argocd.spec.version,
+      argocd.spec.instance_spec.kube_vision_config,
+      argocd_secret
+      ]
   }
 }
 
@@ -216,32 +251,31 @@ resource "akp_kargo_instance" "kargo-instance" {
     adminAccountPasswordHash = bcrypt(var.argo_admin_password)
   }
   lifecycle {
-    ignore_changes = [kargo.spec.version]
+    ignore_changes = [kargo.spec.version,kargo_secret]
   }
 }
 
 
-# resource "akp_kargo_agent" "kargo-agent" {
-#   instance_id = akp_kargo_instance.kargo-instance.id
-#   workspace   = "default"
-#   name        = "default"
-#   namespace   = "kargo"
-#   labels = {
-#     "app" = "kargo"
-#   }
-#   annotations = {
-#     "app" = "kargo"
-#   }
-#   spec = {
-#     description = "iac managed kargo agent for SE Team demos"
-#     data = {
-#       size           = var.kargo_agent_size
-#       akuity_managed = true
-#       remote_argocd  = akp_instance.se-demo-iac.id
-#     }
-#   }
-#   depends_on = [akp_kargo_instance.kargo-instance]
-# }
+
+resource "akp_kargo_agent" "kargo-agent" {
+  instance_id = akp_kargo_instance.kargo-instance.id
+  workspace   = "default"
+  name        = "sedemo-managed"
+  namespace   = "akuity"
+  reapply_manifests_on_update = true
+  spec = {
+    description = "iac managed kargo agent for SE Team demos"
+    data = {
+      size           = var.kargo_agent_size
+      akuity_managed = true
+      remote_argocd  = akp_instance.se-demo-iac.id # pulled from resource above
+    }
+  }
+  depends_on = [akp_kargo_instance.kargo-instance]
+  lifecycle {
+    ignore_changes = [spec.data.target_version,spec.data.size]
+  }
+}
 
 # import {
 #   to = akp_kargo_agent.local-kargo-agent
@@ -281,7 +315,11 @@ resource "akp_kargo_agent" "local-kargo-agent" {
 }
 
 
-
+resource "akp_kargo_default_shard_agent" "default_shard_agent" {
+  kargo_instance_id = akp_kargo_instance.kargo-instance.id
+  agent_id          = akp_kargo_agent.local-kargo-agent.id
+  depends_on = [akp_kargo_instance.kargo-instance]
+}
 
 # Register primary cluster with ArgoCD
 resource "akp_cluster" "eks-cluster" {
@@ -303,7 +341,7 @@ resource "akp_cluster" "eks-cluster" {
   namespace = "akuity"
   spec = {
     data = {
-      size = "small"
+      size = "medium"
     }
   }
   depends_on = [akp_instance.se-demo-iac]

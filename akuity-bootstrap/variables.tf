@@ -32,6 +32,11 @@ variable "kargo_instance_version" {
   type        = string
   default     = "v1.10.0-rc.2"
 }
+variable "kargo_agent_version" {
+  description = "The version of the Kargo agent to create or update."
+  type        = string
+  default     = "0.5.86"
+}
 
 variable "kargo_agent_size" {
   description = "Size of the Kargo agent"
