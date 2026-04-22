@@ -8,6 +8,7 @@ terraform {
   required_providers {
     akp = {
       source  = "akuity/akp"
+      version = "0.10.1-rc.1"
     }
   }
 }
