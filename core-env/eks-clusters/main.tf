@@ -46,8 +46,23 @@ module "eks" {
   enable_irsa = true
 
   addons = {
-    coredns    = {}
-    kube-proxy = {}
+    coredns    = {
+      configuration_values = jsonencode({
+        resources = {
+          requests = {
+            cpu    = "50m"
+          }
+        }
+      })
+    }
+    kube-proxy = {
+      configuration_values = jsonencode({
+        resources = {
+          requests = {
+            cpu    = "50m"
+          }
+        }
+      })}
     vpc-cni = {
       before_compute = true
       most_recent    = true # To ensure access to the latest settings provided
@@ -81,7 +96,6 @@ module "eks" {
 
       iam_role_attach_cni_policy = true
     }
-
 
 
   }

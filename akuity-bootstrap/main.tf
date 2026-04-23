@@ -335,12 +335,14 @@ resource "akp_cluster" "eks-cluster" {
       }
     }
   }
+  
 
   name      = data.terraform_remote_state.eks_clusters.outputs.primary_cluster_name
   namespace = "akuity"
   spec = {
     data = {
       size = "medium"
+      kustomization = file("${path.module}/templates/argo-cluster-kustomization.yaml")
     }
   }
   depends_on = [akp_instance.se-demo-iac]
