@@ -13,13 +13,33 @@ permissions:
   id-token: write
   pull-requests: write
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      akuity: ${{ steps.filter.outputs.akuity }}
+      argocd: ${{ steps.filter.outputs.argocd }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            akuity:
+              - 'akuity-bootstrap/**'
+              - '.github/workflows/akuity*'
+            argocd:
+              - 'argocd-bootstrap/**'
+              - '.github/workflows/akuity*'
+
   akuity_setup:
+    needs: [changes]
+    if: needs.changes.outputs.akuity == 'true'
     env:
       AKUITY_API_KEY_ID: ${{ secrets.AKUITY_API_KEY_ID }}
       AKUITY_API_KEY_SECRET: ${{ secrets.AKUITY_API_KEY_SECRET }}
       TF_VAR_ARGO_ADMIN_PASSWORD: ${{ secrets.TF_VAR_ARGO_ADMIN_PASSWORD }}
       TF_VAR_MS_OAUTH_CLIENT_ID: ${{ secrets.TF_VAR_MS_OAUTH_CLIENT_ID }}
-      TF_VAR_MS_OAUTH_CLIENT_SECRET: ${{ secrets.TF_VAR_MS_OAUTH_CLIENT_SECRET }} 
+      TF_VAR_MS_OAUTH_CLIENT_SECRET: ${{ secrets.TF_VAR_MS_OAUTH_CLIENT_SECRET }}
       TF_VAR_MS_OAUTH_TENANT_ID: ${{ secrets.TF_VAR_MS_OAUTH_TENANT_ID }}
     defaults:
       run:
@@ -45,9 +65,11 @@ jobs:
       - id: plan
         run: tofu plan -var argo_admin_password=$TF_VAR_ARGO_ADMIN_PASSWORD
       - id: apply
-        run: tofu apply  --auto-approve -var argo_admin_password=$TF_VAR_ARGO_ADMIN_PASSWORD
+        run: tofu apply --auto-approve -var argo_admin_password=$TF_VAR_ARGO_ADMIN_PASSWORD
+
   app_of_apps:
-    needs: [akuity_setup]
+    needs: [changes, akuity_setup]
+    if: needs.changes.outputs.argocd == 'true' && (needs.akuity_setup.result == 'success' || needs.akuity_setup.result == 'skipped')
     defaults:
       run:
         working-directory: argocd-bootstrap

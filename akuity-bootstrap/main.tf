@@ -157,9 +157,10 @@ resource "akp_instance" "se-demo-iac" {
       g, sedemo-admin, role:platform-team
       # grant auditor-role to  readonly role
       g, sedemo-auditor, role:readonly
-      # github-actions service account: refresh any ApplicationSet
-      p, role:appset-refresh, applicationsets, get, */*,  allow
-      g, github-actions, role:appset-refresh
+      # github-actions service account: refresh applications and applicationsets
+      p, role:argocd-refresh, applications,    get, */*,  allow
+      p, role:argocd-refresh, applicationsets, get, */*,  allow
+      g, github-actions, role:argocd-refresh
       EOF
   }
   # Set password for `admin` user.
