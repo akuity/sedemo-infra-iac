@@ -132,7 +132,7 @@ resource "akp_instance" "se-demo-iac" {
   argocd_cm = {
     "accounts.admin"          = "login"
     "accounts.github-actions" = "apiKey"
-    "dex.config"     = <<-EOF
+    "dex.config"              = <<-EOF
       connectors:
       - type: microsoft
         # Required field for connector id.
