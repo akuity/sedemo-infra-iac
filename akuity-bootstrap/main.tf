@@ -172,7 +172,7 @@ resource "akp_instance" "se-demo-iac" {
       argocd.spec.version,
       argocd.spec.instance_spec.kube_vision_config,
       argocd_secret
-      ]
+    ]
   }
 }
 
@@ -255,17 +255,17 @@ resource "akp_kargo_instance" "kargo-instance" {
     adminAccountPasswordHash = bcrypt(var.argo_admin_password)
   }
   lifecycle {
-    ignore_changes = [kargo.spec.version,kargo_secret]
+    ignore_changes = [kargo.spec.version, kargo_secret]
   }
 }
 
 
 
 resource "akp_kargo_agent" "kargo-agent" {
-  instance_id = akp_kargo_instance.kargo-instance.id
-  workspace   = "default"
-  name        = "sedemo-managed"
-  namespace   = "akuity"
+  instance_id                 = akp_kargo_instance.kargo-instance.id
+  workspace                   = "default"
+  name                        = "sedemo-managed"
+  namespace                   = "akuity"
   reapply_manifests_on_update = true
   spec = {
     description = "iac managed kargo agent for SE Team demos"
@@ -321,7 +321,7 @@ resource "akp_kargo_agent" "local-kargo-agent" {
 resource "akp_kargo_default_shard_agent" "default_shard_agent" {
   kargo_instance_id = akp_kargo_instance.kargo-instance.id
   agent_id          = akp_kargo_agent.local-kargo-agent.id
-  depends_on = [akp_kargo_instance.kargo-instance]
+  depends_on        = [akp_kargo_instance.kargo-instance]
 }
 
 # Register primary cluster with ArgoCD
@@ -339,13 +339,13 @@ resource "akp_cluster" "eks-cluster" {
       }
     }
   }
-  
+
 
   name      = data.terraform_remote_state.eks_clusters.outputs.primary_cluster_name
   namespace = "akuity"
   spec = {
     data = {
-      size = "medium"
+      size          = "medium"
       kustomization = file("${path.module}/templates/argo-cluster-kustomization.yaml")
     }
   }
