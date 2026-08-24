@@ -84,7 +84,7 @@ resource "akp_kargo_instance" "kargo-unstable-instance" {
     adminAccountPasswordHash = bcrypt(var.argo_admin_password)
   }
   lifecycle {
-    ignore_changes = [ kargo_secret]
+    ignore_changes = [kargo_secret]
   }
 }
 
