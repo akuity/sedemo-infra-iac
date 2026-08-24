@@ -35,8 +35,11 @@ module "eks" {
   source             = "terraform-aws-modules/eks/aws"
   version            = "~> 21.25.0"
   name               = var.primary_cluster_name
-  kubernetes_version = 1.36
-
+  # WARNING: EKS based k8s upgrades may only be 1 minor version from current. 
+  # So to move from 1.36 to 1.38 you must first upgrade to 1.37, then 1.38. 
+  # See https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html
+  kubernetes_version = 1.36 
+  
   vpc_id                  = module.vpc.vpc_id
   subnet_ids              = module.vpc.public_subnets
   endpoint_public_access  = true
