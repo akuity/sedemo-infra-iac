@@ -1,5 +1,6 @@
-
-# create or update an AKP (ArgoCD) instance.
+###################################################
+# Primary SE Demo ArgoCD instance, with Kargo integration and AI runbooks for incident management.
+##################################################
 resource "akp_instance" "se-demo-iac" {
   name = var.akp_instance_name
   argocd = {
@@ -177,7 +178,7 @@ resource "akp_instance" "se-demo-iac" {
   }
 }
 
-# create or update a Kargo instance.
+# Primary Kargo Instance for SE Team demos
 resource "akp_kargo_instance" "kargo-instance" {
   name      = var.kargo_instance_name
   workspace = "default"
@@ -261,7 +262,7 @@ resource "akp_kargo_instance" "kargo-instance" {
 }
 
 
-
+# Default Agent for Kargo Instance runs on Akuity Control Plane
 resource "akp_kargo_agent" "kargo-agent" {
   instance_id                 = akp_kargo_instance.kargo-instance.id
   workspace                   = "default"
@@ -286,6 +287,7 @@ resource "akp_kargo_agent" "kargo-agent" {
 #   id = "${akp_kargo_instance.kargo-instance.id}/sedemo-primary"
 # }
 
+# Kargo Agent on SE Primary EKS Cluster
 resource "akp_kargo_agent" "local-kargo-agent" {
   instance_id = akp_kargo_instance.kargo-instance.id
   workspace   = "default"
@@ -318,14 +320,14 @@ resource "akp_kargo_agent" "local-kargo-agent" {
   depends_on = [akp_kargo_instance.kargo-instance]
 }
 
-
+# Set the local (EKS) agent as primary instance default.
 resource "akp_kargo_default_shard_agent" "default_shard_agent" {
   kargo_instance_id = akp_kargo_instance.kargo-instance.id
   agent_id          = akp_kargo_agent.local-kargo-agent.id
   depends_on        = [akp_kargo_instance.kargo-instance]
 }
 
-# Register primary cluster with ArgoCD
+# Register primary cluster with ArgoCD and install Agent manifests
 resource "akp_cluster" "eks-cluster" {
   instance_id = akp_instance.se-demo-iac.id
   kube_config = {
@@ -341,7 +343,6 @@ resource "akp_cluster" "eks-cluster" {
     }
   }
 
-
   name      = data.terraform_remote_state.eks_clusters.outputs.primary_cluster_name
   namespace = "akuity"
   spec = {
@@ -353,7 +354,7 @@ resource "akp_cluster" "eks-cluster" {
   depends_on = [akp_instance.se-demo-iac]
 }
 
-# register the Kargo cluster with ArgoCD, so we can declaratively manage Kargo projects from ArgoCD
+# register the Akuity Kargo cluster with ArgoCD, so we can declaratively manage Kargo projects from ArgoCD
 resource "akp_cluster" "kargo-cluster" {
   instance_id = akp_instance.se-demo-iac.id
 
@@ -371,6 +372,11 @@ resource "akp_cluster" "kargo-cluster" {
   }
   depends_on = [akp_kargo_instance.kargo-instance, akp_instance.se-demo-iac]
 }
+
+
+##################################################
+# Custom vanity Domains for Kargo and Argo CD.
+##################################################
 
 resource "aws_route53_record" "argo_custom_domain" {
 
