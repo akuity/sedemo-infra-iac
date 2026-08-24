@@ -33,9 +33,9 @@ module "vpc" {
 
 module "eks" {
   source             = "terraform-aws-modules/eks/aws"
-  version            = "~> 21.8.0"
+  version            = "~> 21.25.0"
   name               = var.primary_cluster_name
-  kubernetes_version = 1.34
+  kubernetes_version = 1.36
 
   vpc_id                  = module.vpc.vpc_id
   subnet_ids              = module.vpc.public_subnets
@@ -46,11 +46,11 @@ module "eks" {
   enable_irsa = true
 
   addons = {
-    coredns    = {
+    coredns = {
       configuration_values = jsonencode({
         resources = {
           requests = {
-            cpu    = "50m"
+            cpu = "50m"
           }
         }
       })
@@ -59,10 +59,10 @@ module "eks" {
       configuration_values = jsonencode({
         resources = {
           requests = {
-            cpu    = "50m"
+            cpu = "50m"
           }
         }
-      })}
+    }) }
     vpc-cni = {
       before_compute = true
       most_recent    = true # To ensure access to the latest settings provided
@@ -297,7 +297,7 @@ resource "aws_iam_role_policy_attachment" "irsa_secrets" {
 #           StringLike = {
 #             "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:aud" = "sts.amazonaws.com",
 #             "${replace(module.eks.cluster_oidc_issuer_url, "https://", "")}:sub" = "system:serviceaccount:akuity:*",
-            
+
 #           }
 #         }
 #       }
