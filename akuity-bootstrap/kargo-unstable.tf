@@ -3,7 +3,7 @@
 ##################################################
 
 locals {
-  kargo_unstable_custom_url = "${var.kargo_instance_name}-unstable.${data.terraform_remote_state.eks_clusters.outputs.demo_domain}"
+  kargo_unstable_custom_url = "kargo-unstable.${data.terraform_remote_state.eks_clusters.outputs.demo_domain}"
 }
 
 resource "akp_kargo_instance" "kargo-unstable-instance" {
@@ -11,7 +11,7 @@ resource "akp_kargo_instance" "kargo-unstable-instance" {
   workspace = "default"
   kargo = {
     spec = {
-      version   = "unstable"
+      version   = var.kargo_unstable_version
       fqdn      = local.kargo_unstable_custom_url
       subdomain = "" #must be empty for fqdn 
       kargo_instance_spec = {
@@ -144,7 +144,7 @@ resource "akp_cluster" "unstable-kargo-cluster" {
 resource "aws_route53_record" "unstable_kargo_custom_domain" {
 
   zone_id = data.terraform_remote_state.eks_clusters.outputs.root_zone_id
-  name    = local.kargo_custom_url
+  name    = local.kargo_unstable_custom_url
   type    = "CNAME"
   ttl     = 5
 
