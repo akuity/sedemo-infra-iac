@@ -25,3 +25,12 @@ output "argo_custom_url" {
   value       = local.argo_custom_url
 
 }
+
+output "kargo_unstable_custom_url" {
+  description = "The ID of the Kargo unstable instance"
+  value       = local.kargo_unstable_custom_url
+}
+output "kargo_unstable_instance_id" {
+  description = "The ID of the Kargo unstable instance"
+  value       = akp_kargo_instance.kargo-unstable-instance.id
+}
