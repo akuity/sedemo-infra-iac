@@ -38,6 +38,12 @@ variable "kargo_agent_version" {
   default     = "0.5.88"
 }
 
+variable "kargo_unstable_version" {
+  description = "The version of the Kargo instance to create or update."
+  type        = string
+  default     = "v1.12.0-unstable-20260724"
+}
+
 variable "kargo_agent_size" {
   description = "Size of the Kargo agent"
   type        = string
