@@ -11,5 +11,5 @@ pip install c7n       # This includes AWS support
 ## Run the policies
 
 ```
-AWS_PROFILE=pipeline custodian run --output-dir=./reports eks-policy.yaml --region all
+AWS_PROFILE=admin custodian run --output-dir=./reports eks-policy.yaml --region all
 ```
