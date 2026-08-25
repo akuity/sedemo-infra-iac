@@ -1,0 +1,63 @@
+policies:
+  - name: elb-is-noncompliant
+    resource: elb
+    filters:
+      - or:
+        - "tag:cost_center": absent
+        - "tag:Team": absent
+        - "tag:kubernetes.io/service-name": absent
+        - type: value
+          key: "tag:kubernetes.io/service-name"
+          op: ne
+          value: "ingress-nginx/ingress-nginx-controller"
+  - name: tag-compliance-mark-eks
+    resource: aws.eks
+    filters:
+      - or:
+        - "tag:cost_center": absent
+        - "tag:Team": absent
+        - "tag:critical_until": absent
+  - name: tag-compliance-mark
+    resource: aws.ec2
+    filters:
+      - or:
+        - "tag:cost_center": absent
+        - "tag:Team": absent
+        - "tag:critical_until": absent
+    actions:
+      - type: mark-for-op
+        tag: c7n_status
+        op: stop
+        days: 5
+      # - type: notify
+      #   template: default.html
+      #   priority_header: 1
+      #   subject: "SE Demo Assets - Missing Required Tags - [custodian {{ account }} - {{ region }}]"
+      #   violation_desc:  |
+      #     Your AWS assets and related servers are missing the required tags and is now marked
+      #     for suspension if tags not added within 5 days:
+      #   action_desc: |
+      #     "Actions Taken:  The ASG is marked to be suspended tomorrow if
+      #     required tags don't get added to the ASG"
+      #   to:
+      #     - eddie@akuity.io
+      #     - event-owner
+      #   transport:
+      #     type: sqs
+      #     queue: https://sqs.us-east-1.amazonaws.com/XXXXXXXXXX/cloud-custodian-mailer
+      #     region: us-east-1
+  - name: ec2-tag-compliance-unmark
+    resource: ec2
+    comment: |
+      Any instances which have previously been marked as
+      non compliant with tag policies, that are now compliant
+      should be unmarked as non-compliant.
+    filters:
+        - "tag:cost_center": not-null
+        - "tag:Team": not-null
+        - "tag:critical_until": not-null
+        - "tag:c7n_status": not-null
+    actions:
+      - type: remove-tag
+        tags:
+          - c7n_status
