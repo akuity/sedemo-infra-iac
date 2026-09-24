@@ -235,13 +235,14 @@ resource "akp_kargo_instance" "kargo-instance" {
         }
         viewer_account = {
           claims = {
+            groups = {
+              values = ["sedemo-user", "Akuity"]
+            }
           }
         }
         user_account = {
           claims = {
-            groups = {
-              values = ["sedemo-user", "Akuity"]
-            }
+
           }
         }
         project_creator_account = {
