@@ -451,7 +451,10 @@ controller:
       # -- Labels to be added to the external controller service.
       labels: {}
     # -- Annotations to be added to the external controller service. See `controller.service.internal.annotations` for annotations to be added to the internal controller service.
-    annotations: {}
+    annotations:
+      Team: "Sales Engineering"
+      owner: eddie.webbinaro@akuity.io
+      cost_center: "Sales"
     # from AWS docs suggests we should add following to annotations
     # https://aws.amazon.com/blogs/containers/exposing-kubernetes-applications-part-3-nginx-ingress-controller/
       # service.beta.kubernetes.io/aws-load-balancer-name: apps-ingress
