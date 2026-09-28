@@ -30,5 +30,5 @@ data "aws_secretsmanager_secret_version" "twingate" {
 }
 
 locals {
-  twingate_secret = jsondecode(data.aws_secretsmanager_secret_version.secret_string)
+  twingate_secret = jsondecode(data.aws_secretsmanager_secret_version.twingate.secret_string)
 }
