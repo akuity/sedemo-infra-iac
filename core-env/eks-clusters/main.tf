@@ -234,7 +234,7 @@ resource "aws_route53_record" "records" {
 
 #
 # ESO - External Secrets Operator
-#. Creates a policy with access to secrets, 
+#. Creates a policy with access to secrets,
 #.   a role granting assume permissions from cluster OIDC provider, and a policy attachment connecting them.
 #.   Service Accounts must specify the role's ARN to gain access. See platform repo's /secrets path
 
@@ -316,3 +316,31 @@ resource "aws_iam_role_policy_attachment" "irsa_secrets" {
 
 
 # arn:aws:sts::218691292270:assumed-role/default-eks-node-group-20251111192150921200000002/i-0121fb11f5ec3bd40
+
+#
+# Twingate
+#
+resource "helm_release" "twingate_connector" {
+  name             = "twingate-connector"
+  repository       = "https://twingate.github.io/helm-charts"
+  chart            = "connector"
+  create_namespace = true
+  namespace        = "twingate"
+
+  set = [
+    {
+      name  = "connector.network"
+      value = var.twingate_network
+    }
+  ]
+  set_sensitive = [
+    {
+      name  = "connector.accessToken"
+      value = local.twingate_secret["access-token"]
+    },
+    {
+      name  = "connector.refreshToken"
+      value = local.twingate_secret["refresh-token"]
+    }
+  ]
+}

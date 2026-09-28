@@ -31,3 +31,13 @@ variable "root_domain_name" {
   default     = "akpdemoapps.link"
   description = "This is registered/managed outside Terraform so we can destroy clusters without destroying domain registration."
 }
+
+variable "twingate_secret_arn" {
+  default     = "arn:aws:secretsmanager:us-west-2:218691292270:secret:sedemo/twingate-VTxfq2"
+  description = "The ARN of the Twingate acess-token and refresh-token in AWS Secrets Manager."
+}
+
+variable "twingate_network" {
+  default     = "akuity.twingate.com"
+  description = "The Twingate network name."
+}

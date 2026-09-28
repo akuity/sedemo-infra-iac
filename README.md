@@ -1,14 +1,15 @@
 # Akuity IaC Demo Project
 
-This project uses terraform to bootstrap a full GitOps environment from scratch.  
+This project uses terraform to bootstrap a full GitOps environment from scratch.
 It is primarily intended for use by our field teams to demonstrate these capabilities, but may present a useful example or starting template for customers.
 
 It logically represents the "base" layer often controlled by infrastructure teams, and does not configure individual application manifests.
 
 ## Directories
+
 - `core-env` this folder contains 2 modules:
   - `aws` provisions base AWS resources including IAM roles used by the pipeline and operators. and domain used by deployed apps.  Customers will most likely already have solutions for this base layer.
-  - `eks-clusters` provisions a VPC and small EKS cluster to host sample applications and Akuity local agents. It installs `ingress-nginx` tied to the demo domain.
+  - `eks-clusters` provisions a VPC and small EKS cluster to host sample applications and Akuity local agents. It installs `ingress-nginx` and `twingate-connector` tied to the demo domain.
 - `akuity-bootstrap` requires an existing Akuity Org and API key with admin rights. See [`akuity-bootstrap/README.md`](akuity-bootstrap/README.md) for full details. The terraform module will:
   - provision an AKP instance (Enterprise ArgoCD) with Akuity Intelligence & AI Powered Runbooks enabled
   - provision an Enterprise Kargo instance with Microsoft OIDC
