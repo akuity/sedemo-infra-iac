@@ -197,9 +197,6 @@ resource "akp_kargo_instance" "kargo-instance" {
           min_freight_deletion_age   = 1209600
           min_promotion_deletion_age = 1209600
         }
-        global_credentials_ns = [
-          "kargo-secrets-namespace"
-        ]
       }
       oidc_config = {
         enabled     = true
