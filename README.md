@@ -5,6 +5,27 @@ It is primarily intended for use by our field teams to demonstrate these capabil
 
 It logically represents the "base" layer often controlled by infrastructure teams, and does not configure individual application manifests.
 
+## Tooling: OpenTofu, not Terraform
+
+These modules must be run with [OpenTofu](https://opentofu.org/) (`tofu`) version 1.8 or later, which is also what CI uses (`opentofu/setup-opentofu`). HashiCorp Terraform (`terraform`) will not work.
+
+`core-env/eks-clusters` and `akuity-bootstrap` build their S3 backend `key` from input variables, for example:
+
+```hcl
+key = "cluster-${var.primary_cluster_name}/terraform.tfstate"
+```
+
+OpenTofu 1.8 and later evaluate static variables and locals early, so they work in `backend` blocks. Terraform does not, and `terraform init` fails with:
+
+```text
+Error: Variables not allowed
+  on providers.tf line 13, in terraform:
+  13:     key          = "cluster-${var.primary_cluster_name}/terraform.tfstate"
+Variables may not be used here.
+```
+
+If you hit this error, run `tofu init` instead (check any `tf` shell alias too). Stick with `tofu` for these states, and don't alternate between `terraform` and `tofu` on the same state file.
+
 ## Directories
 
 - `core-env` this folder contains 2 modules:
