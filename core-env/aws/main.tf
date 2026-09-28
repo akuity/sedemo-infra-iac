@@ -90,7 +90,7 @@ resource "aws_iam_policy" "demo_gha_policy" {
   policy = templatefile(
     "${path.module}/templates/pipeline_policy.json.tpl",
     {
-
+      AWS_ACCOUNT_ID = data.aws_caller_identity.current.id
     }
   )
 

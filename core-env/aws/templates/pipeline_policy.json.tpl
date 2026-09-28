@@ -186,6 +186,15 @@
                     ]
                 }
             }
+        },
+        {
+            "Sid": "ReadTwingateSecret",
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret"
+            ],
+            "Resource": "arn:aws:secretsmanager:us-west-2:${AWS_ACCOUNT_ID}:secret:sedemo/twingate-*"
         }
     ]
 }
