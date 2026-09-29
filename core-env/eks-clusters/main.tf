@@ -326,7 +326,7 @@ resource "helm_release" "twingate_connector" {
   chart            = "connector"
   create_namespace = true
   namespace        = "twingate"
-  depends_on = [module.eks]
+  depends_on       = [module.eks]
   set = [
     {
       name  = "connector.network"
