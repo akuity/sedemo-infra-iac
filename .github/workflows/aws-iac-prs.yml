@@ -33,25 +33,38 @@ jobs:
         uses: opentofu/setup-opentofu@v1
       - name: OpenTofu fmt
         id: fmt
-        run: tofu fmt -check > /tmp/fmt.out
+        shell: bash
+        run: tofu fmt -check 2>&1 | tee /tmp/fmt.out
         continue-on-error: true
       - name: fmt output
         id: fmt_outcome
         run: echo "output=${{steps.fmt.outcome}}" >> "$GITHUB_OUTPUT"
-      - run: tofu init
+      - run: tofu init -input=false
+      # Exit code 2 from -detailed-exitcode means "changes present", not an error
       - id: plan
-        run: tofu plan -no-color > /tmp/plan.out
+        shell: bash
+        run: |
+          set +e
+          tofu plan -no-color -input=false -detailed-exitcode 2>&1 | tee /tmp/plan.out
+          ec=${PIPESTATUS[0]}
+          echo "exitcode=$ec" >> "$GITHUB_OUTPUT"
+          [ "$ec" -eq 1 ] && exit 1 || exit 0
         continue-on-error: true
       - name: plan output
         id: plan_outcome
         run: echo "output=${{steps.plan.outcome}}" >> "$GITHUB_OUTPUT"
       - name: Upload plan
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: output-aws
           path: /tmp/*.out
+      - name: Fail if fmt or plan failed
+        if: steps.fmt.outcome == 'failure' || steps.plan.outcome == 'failure'
+        run: exit 1
   eks_primary:
     needs: core_aws
+    if: ${{ !cancelled() }}
     outputs:
       plan: ${{ steps.plan_outcome.outputs.output }}
       fmt: ${{ steps.fmt_outcome.outputs.output }}
@@ -74,27 +87,40 @@ jobs:
         uses: opentofu/setup-opentofu@v1
       - name: OpenTofu fmt
         id: fmt
-        run: tofu fmt -check > /tmp/fmt.out
+        shell: bash
+        run: tofu fmt -check 2>&1 | tee /tmp/fmt.out
         continue-on-error: true
       - name: fmt output
         id: fmt_outcome
         run: echo "output=${{steps.fmt.outcome}}" >> "$GITHUB_OUTPUT"
-      - run: tofu init
+      - run: tofu init -input=false
+      # Exit code 2 from -detailed-exitcode means "changes present", not an error
       - id: plan
-        run: tofu plan -no-color > /tmp/plan.out
+        shell: bash
+        run: |
+          set +e
+          tofu plan -no-color -input=false -detailed-exitcode 2>&1 | tee /tmp/plan.out
+          ec=${PIPESTATUS[0]}
+          echo "exitcode=$ec" >> "$GITHUB_OUTPUT"
+          [ "$ec" -eq 1 ] && exit 1 || exit 0
         continue-on-error: true
       - name: plan output
         id: plan_outcome
         run: echo "output=${{steps.plan.outcome}}" >> "$GITHUB_OUTPUT"
       - name: Upload plan
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: output-eks
           path: /tmp/*.out
+      - name: Fail if fmt or plan failed
+        if: steps.fmt.outcome == 'failure' || steps.plan.outcome == 'failure'
+        run: exit 1
   pr_comment:
-    needs: 
+    needs:
       - eks_primary
       - core_aws
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
@@ -122,8 +148,18 @@ jobs:
 
             // 2. Prepare format of the comment
             const fs = require('fs');
-            const awsCorePlan = fs.readFileSync('output-aws/plan.out', 'utf8');
-            const eksPrimaryPlan = fs.readFileSync('output-eks/plan.out', 'utf8');
+            // Plans may be missing if a job failed early or was skipped, and PR
+            // comments are capped at 65536 chars, so keep each plan well under half
+            const MAX_PLAN = 30000;
+            const readPlan = path => {
+              if (!fs.existsSync(path)) return 'No plan output (job failed before plan or was skipped)';
+              const plan = fs.readFileSync(path, 'utf8');
+              return plan.length > MAX_PLAN
+                ? plan.slice(0, MAX_PLAN) + '\n\n... truncated, see the workflow artifact for the full plan'
+                : plan;
+            };
+            const awsCorePlan = readPlan('output-aws/plan.out');
+            const eksPrimaryPlan = readPlan('output-eks/plan.out');
             const output = `
             ### AWS Core
 
