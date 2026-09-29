@@ -35,8 +35,8 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 21.25.0"
   name    = var.primary_cluster_name
-  # WARNING: EKS based k8s upgrades may only be 1 minor version from current. 
-  # So to move from 1.36 to 1.38 you must first upgrade to 1.37, then 1.38. 
+  # WARNING: EKS based k8s upgrades may only be 1 minor version from current.
+  # So to move from 1.36 to 1.38 you must first upgrade to 1.37, then 1.38.
   # See https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html
   kubernetes_version = 1.36
 
@@ -326,11 +326,19 @@ resource "helm_release" "twingate_connector" {
   chart            = "connector"
   create_namespace = true
   namespace        = "twingate"
-
+  depends_on = [module.eks]
   set = [
     {
       name  = "connector.network"
       value = var.twingate_network
+    },
+    {
+      name  = "connector.logLevel"
+      value = var.twingate_log_level
+    },
+    {
+      name  = "connector.logAnalytics"
+      value = var.twingate_log_analytics
     }
   ]
   set_sensitive = [
