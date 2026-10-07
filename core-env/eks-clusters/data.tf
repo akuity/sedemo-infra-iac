@@ -24,3 +24,11 @@ data "aws_region" "current" {}
 data "aws_availability_zones" "available" {}
 
 data "aws_caller_identity" "current" {}
+
+data "aws_secretsmanager_secret_version" "twingate" {
+  secret_id = var.twingate_secret_arn
+}
+
+locals {
+  twingate_secret = jsondecode(data.aws_secretsmanager_secret_version.twingate.secret_string)
+}

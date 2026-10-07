@@ -31,3 +31,29 @@ variable "root_domain_name" {
   default     = "akpdemoapps.link"
   description = "This is registered/managed outside Terraform so we can destroy clusters without destroying domain registration."
 }
+
+variable "twingate_secret_arn" {
+  default     = "arn:aws:secretsmanager:us-west-2:218691292270:secret:sedemo/twingate-VTxfq2"
+  description = "The ARN of the Twingate acess-token and refresh-token in AWS Secrets Manager."
+  sensitive   = true
+}
+
+variable "twingate_network" {
+  default     = "akuity.twingate.com"
+  type        = string
+  description = "The Twingate network name."
+}
+
+variable "twingate_log_level" {
+  # Set to debug for the initial deployment to diagnose connector issues; lower to error once stable.
+  default     = "debug"
+  type        = string
+  description = "The log level for Twingate. Values are [error, warn, info, debug].  Default is error."
+}
+
+variable "twingate_log_analytics" {
+  # Enabled for the initial deployment; set to null to disable once stable.
+  default     = "v2"
+  type        = string
+  description = "Whether to enable real-time connection logs for Twingate.  Values are [null, v1, v2].  v1 is the legacy log format, v2 is the new log format.  If null, logging is disabled.  Default is null."
+}
