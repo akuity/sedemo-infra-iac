@@ -305,11 +305,11 @@ resource "akp_kargo_agent" "local-kargo-agent" {
 }
 
 # Self-hosted Kargo agent in a homelab cluster, used only by Stages that pin
-# `shard: homelab` (VM deployment demo). Not the default shard.
-resource "akp_kargo_agent" "homelab-kargo-agent" {
+# `shard: team-ada` (VM deployment demo). Not the default shard.
+resource "akp_kargo_agent" "team-ada-kargo-agent" {
   instance_id = akp_kargo_instance.kargo-instance.id
   workspace   = "default"
-  name        = "homelab"
+  name        = "team-ada"
   namespace   = "akuity"
   spec = {
     description = "self-hosted homelab kargo agent for VM deployment demo"
