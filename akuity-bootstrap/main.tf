@@ -304,6 +304,24 @@ resource "akp_kargo_agent" "local-kargo-agent" {
   depends_on = [akp_kargo_instance.kargo-instance]
 }
 
+# Self-hosted Kargo agent in a homelab cluster, used only by Stages that pin
+# `shard: homelab` (VM deployment demo). Not the default shard.
+resource "akp_kargo_agent" "homelab-kargo-agent" {
+  instance_id = akp_kargo_instance.kargo-instance.id
+  workspace   = "default"
+  name        = "homelab"
+  namespace   = "akuity"
+  spec = {
+    description = "self-hosted homelab kargo agent for VM deployment demo"
+    data = {
+      size           = var.kargo_agent_size
+      akuity_managed = false
+      remote_argocd  = akp_instance.se-demo-iac.id # pulled from resource above
+    }
+  }
+  depends_on = [akp_kargo_instance.kargo-instance]
+}
+
 # Set the local (EKS) agent as primary instance default.
 resource "akp_kargo_default_shard_agent" "default_shard_agent" {
   kargo_instance_id = akp_kargo_instance.kargo-instance.id
