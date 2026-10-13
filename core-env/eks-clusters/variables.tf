@@ -39,9 +39,9 @@ variable "twingate_secret_arn" {
 }
 
 variable "twingate_network" {
-  default     = "akuity.twingate.com"
+  default     = "akuity"
   type        = string
-  description = "The Twingate network name."
+  description = "The Twingate network slug (the subdomain only, e.g. 'akuity' for akuity.twingate.com). The chart appends '.twingate.com'."
 }
 
 variable "twingate_log_level" {
