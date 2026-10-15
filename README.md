@@ -45,6 +45,25 @@ If you hit this error, run `tofu init` instead (check any `tf` shell alias too).
   - seed the `templated-apps` Application pointing to `templated-teams/` in the platform repo
   - after apply, ArgoCD takes over and all subsequent app/component management is fully declarative from the platform repo
 
+## Private EKS API and Twingate
+
+The `sedemo-primary` API endpoint is private (`eks_endpoint_public_access = false`). People and the GitHub Actions jobs that need the cluster (`eks_primary`, `akuity_setup`, `app_of_apps`) reach it through Twingate:
+
+- The connector runs in the cluster (`helm_release.twingate_connector`).
+- Workflows authenticate with the service key in Secrets Manager (`sedemo/twingate-gha-service-key`).
+- Twingate has a Resource for the endpoint hostname (TCP 443). It is managed in the Twingate admin console, not in Terraform.
+
+To use `kubectl`, connect the Twingate client with an account that has access to that Resource.
+
+### Bootstrapping a fresh cluster
+
+The connector is installed by `core-env/eks-clusters` itself, so a new cluster's API is unreachable until it exists. Open the public endpoint for the bootstrap, then close it (the same pattern as `akuityio/infra-terraform`):
+
+1. In a PR, set the `eks_endpoint_public_access` default to `true` in `core-env/eks-clusters/variables.tf`. Merge it to create the cluster, connector and ingress. When applying locally, pass `-var eks_endpoint_public_access=true` instead.
+2. Update the Twingate Resource address to the new endpoint hostname (`tofu output primary_cluster_endpoint`, without `https://`). The hostname embeds the cluster ID, so it changes on every recreate. If the Resource is a wildcard covering the new hostname, connected clients route it to a connector that doesn't exist yet during step 1. In that case, disconnect Twingate for the bootstrap apply.
+3. Check that the connector shows as connected in the Twingate admin console, and that `kubectl get ns` works over Twingate.
+4. Revert the default to `false` in a PR and merge. Changing endpoint access takes several minutes.
+5. Apply `akuity-bootstrap` and `argocd-bootstrap` (`akuity-iac-main`). They reach the cluster through Twingate.
 
 ## Related Repos
 

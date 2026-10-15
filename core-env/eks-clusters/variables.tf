@@ -23,6 +23,16 @@ variable "primary_cluser_node_type" {
   default = "t3.large"
 }
 
+variable "eks_endpoint_public_access" {
+  # TEMPORARY true only while bootstrapping a fresh cluster: the Twingate
+  # connector is installed by this module, so nothing can reach a private-only
+  # API until it exists. Set back to false once the connector is online and the
+  # Twingate Resource points at the new endpoint. See README "Bootstrapping".
+  description = "Expose the EKS API endpoint publicly. Keep false outside of bootstrap; access is via Twingate."
+  type        = bool
+  default     = false
+}
+
 variable "ingress_namespace" {
   default = "ingress-nginx"
 }

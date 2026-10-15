@@ -42,7 +42,7 @@ module "eks" {
 
   vpc_id                  = module.vpc.vpc_id
   subnet_ids              = module.vpc.public_subnets
-  endpoint_public_access  = true
+  endpoint_public_access  = var.eks_endpoint_public_access
   endpoint_private_access = true
 
   # use pod-identity OR irsa, not both
