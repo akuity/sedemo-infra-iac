@@ -13,6 +13,12 @@ terraform {
     key          = "cluster-${var.primary_cluster_name}/terraform.tfstate"
     use_lockfile = true
   }
+  required_providers {
+    twingate = {
+      source  = "Twingate/twingate"
+      version = "~> 5.1"
+    }
+  }
 }
 
 provider "kubernetes" {
@@ -35,4 +41,9 @@ provider "helm" {
       command     = "aws"
     }
   }
+}
+
+provider "twingate" {
+  api_token = data.aws_secretsmanager_secret_version.twingate_api_token.secret_string
+  network   = var.twingate_network
 }

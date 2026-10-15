@@ -352,3 +352,49 @@ resource "helm_release" "twingate_connector" {
     }
   ]
 }
+
+# The EKS API must be reached by its real hostname: the serving cert has no
+# custom-domain SAN, so a vanity name would fail TLS. The hostname embeds the
+# cluster ID and changes on recreate, so it is derived from the cluster here.
+resource "twingate_resource" "eks_api" {
+  name              = "${var.primary_cluster_name} EKS API"
+  address           = lower(trimprefix(module.eks.cluster_endpoint, "https://"))
+  remote_network_id = one(data.twingate_remote_networks.sedemo.remote_networks).id
+
+  protocols = {
+    allow_icmp = false
+    tcp = {
+      policy = "RESTRICTED"
+      ports  = ["443"]
+    }
+    udp = {
+      policy = "DENY_ALL"
+    }
+  }
+
+  access_service {
+    service_account_id = one(data.twingate_service_accounts.gha.service_accounts).id
+  }
+
+  dynamic "access_group" {
+    for_each = toset(flatten(data.twingate_groups.eks_api[*].groups[*].id))
+    content {
+      group_id = access_group.value
+    }
+  }
+
+  lifecycle {
+    precondition {
+      condition     = length(data.twingate_remote_networks.sedemo.remote_networks) == 1
+      error_message = "Expected exactly one Twingate Remote Network named ${var.twingate_remote_network_name}."
+    }
+    precondition {
+      condition     = length(data.twingate_service_accounts.gha.service_accounts) == 1
+      error_message = "Expected exactly one Twingate Service Account named ${var.twingate_gha_service_account_name}."
+    }
+    precondition {
+      condition     = length(flatten(data.twingate_groups.eks_api[*].groups)) == length(var.twingate_eks_api_groups)
+      error_message = "Not every name in twingate_eks_api_groups matched exactly one Twingate Group."
+    }
+  }
+}

@@ -44,6 +44,30 @@ variable "twingate_network" {
   description = "The Twingate network slug (the subdomain only, e.g. 'akuity' for akuity.twingate.com). The chart appends '.twingate.com'."
 }
 
+variable "twingate_api_token_secret_id" {
+  default     = "sedemo/twingate-api-token"
+  type        = string
+  description = "Secrets Manager secret holding the Twingate API token (plain string) used to manage the EKS API Resource."
+}
+
+variable "twingate_remote_network_name" {
+  default     = "TODO-remote-network"
+  type        = string
+  description = "Twingate Remote Network the connector belongs to. The EKS API Resource is created in it."
+}
+
+variable "twingate_gha_service_account_name" {
+  default     = "TODO-gha-service-account"
+  type        = string
+  description = "Twingate Service Account used by GitHub Actions runners (key in sedemo/twingate-gha-service-key)."
+}
+
+variable "twingate_eks_api_groups" {
+  default     = []
+  type        = list(string)
+  description = "Twingate Group names whose members may reach the EKS API (kubectl) through Twingate."
+}
+
 variable "twingate_log_level" {
   # Set to debug for the initial deployment to diagnose connector issues; lower to error once stable.
   default     = "debug"
