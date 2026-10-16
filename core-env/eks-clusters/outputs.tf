@@ -23,3 +23,8 @@ output "irsa_role_arn" {
 output "secrets_sa_role" {
   value = aws_iam_role.eks_service_account_role.arn
 }
+
+output "external_dns_role_arn" {
+  # referenced by the external-dns ServiceAccount in sedemo-platform
+  value = aws_iam_role.external_dns.arn
+}

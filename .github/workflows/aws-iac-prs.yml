@@ -9,8 +9,6 @@ on:
 permissions:
   id-token: write
   pull-requests: write
-env:
-  TWINGATE_SERVICE_KEY_SECRET_ID: sedemo/twingate-gha-service-key
 jobs:
   core_aws:
     outputs:
@@ -85,18 +83,6 @@ jobs:
         run: |
           # Your commands that require AWS credentials
           aws sts get-caller-identity
-      # The EKS API is private; reach it through Twingate (sedemo-platform#183)
-      - name: Fetch Twingate service key
-        uses: aws-actions/aws-secretsmanager-get-secrets@v3
-        with:
-          secret-ids: |
-            TWINGATE_SERVICE_KEY, ${{ env.TWINGATE_SERVICE_KEY_SECRET_ID }}
-      - name: Connect to Twingate
-        uses: twingate/github-action@v1
-        with:
-          service-key: ${{ env.TWINGATE_SERVICE_KEY }}
-      - name: Clear Twingate service key from env
-        run: echo "TWINGATE_SERVICE_KEY=" >> "$GITHUB_ENV"
       - name: Verify Tofu
         uses: opentofu/setup-opentofu@v1
       - name: OpenTofu fmt
