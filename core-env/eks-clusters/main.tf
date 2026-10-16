@@ -42,7 +42,7 @@ module "eks" {
 
   vpc_id                  = module.vpc.vpc_id
   subnet_ids              = module.vpc.public_subnets
-  endpoint_public_access  = true
+  endpoint_public_access  = var.eks_endpoint_public_access
   endpoint_private_access = true
 
   # use pod-identity OR irsa, not both
@@ -175,62 +175,16 @@ data "aws_route53_zone" "root_demo_domain_zone" {
   name = var.root_domain_name
 }
 
-resource "helm_release" "nginx_ingress" {
-  name             = "ingress-nginx"
-  repository       = "https://kubernetes.github.io/ingress-nginx"
-  chart            = "ingress-nginx"
-  create_namespace = true
-  namespace        = var.ingress_namespace
-  values = [
-    file("${path.module}/nginx-helm/values.yaml")
-  ]
-  depends_on = [module.eks]
-}
-
-# the helm chart above will implore AWS to create an ELB. We'll need it's name for the A record below.
-data "aws_elb" "nginx_ingress" {
-  name = substr(data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname, 0, 32)
-
-  depends_on = [
-    helm_release.nginx_ingress
-  ]
-}
-
-resource "aws_route53_record" "landing_global_record" {
-  zone_id = data.aws_route53_zone.root_demo_domain_zone.id
-  name    = data.aws_route53_zone.root_demo_domain_zone.name
-  type    = "A"
-
-  # Using alias gives us health checks without explicit definition of 'HealthCheck'
-  alias {
-    name                   = data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname
-    zone_id                = data.aws_elb.nginx_ingress.zone_id
-    evaluate_target_health = true
+# ingress-nginx and its Route53 records moved to sedemo-platform (Argo CD +
+# external-dns, sedemo-platform#184) so this module never needs the cluster API.
+# Forget the release instead of uninstalling it: Argo CD adopts the running
+# controller and its ELB. The two records are deleted; external-dns recreates them.
+removed {
+  from = helm_release.nginx_ingress
+  lifecycle {
+    destroy = false
   }
-
-  weighted_routing_policy {
-    weight = 100 #every region has equal weight, failover based on alias health check is all we rely on
-  }
-
-  set_identifier = var.primary_cluster_name
-
-  depends_on = [helm_release.nginx_ingress]
 }
-
-resource "aws_route53_record" "records" {
-  for_each = toset([
-    "*."
-  ])
-
-  zone_id = data.aws_route53_zone.root_demo_domain_zone.id
-  name    = each.key
-  type    = "CNAME"
-  ttl     = 5
-
-  records    = [data.kubernetes_service_v1.nginx_ingress.status.0.load_balancer.0.ingress.0.hostname]
-  depends_on = [helm_release.nginx_ingress]
-}
-
 
 #
 # ESO - External Secrets Operator
@@ -318,37 +272,73 @@ resource "aws_iam_role_policy_attachment" "irsa_secrets" {
 # arn:aws:sts::218691292270:assumed-role/default-eks-node-group-20251111192150921200000002/i-0121fb11f5ec3bd40
 
 #
-# Twingate
+# Twingate connector moved to sedemo-platform (Argo CD, tokens via ESO). Forget
+# the release instead of uninstalling it so the connector keeps running.
 #
-resource "helm_release" "twingate_connector" {
-  name             = "twingate-connector"
-  repository       = "https://twingate.github.io/helm-charts"
-  chart            = "connector"
-  create_namespace = true
-  namespace        = "twingate"
-  depends_on       = [module.eks]
-  set = [
-    {
-      name  = "connector.network"
-      value = var.twingate_network
-    },
-    {
-      name  = "connector.logLevel"
-      value = var.twingate_log_level
-    },
-    {
-      name  = "connector.logAnalytics"
-      value = var.twingate_log_analytics
-    }
-  ]
-  set_sensitive = [
-    {
-      name  = "connector.accessToken"
-      value = local.twingate_secret["access-token"]
-    },
-    {
-      name  = "connector.refreshToken"
-      value = local.twingate_secret["refresh-token"]
-    }
-  ]
+removed {
+  from = helm_release.twingate_connector
+  lifecycle {
+    destroy = false
+  }
+}
+
+#
+# external-dns: manages akpdemoapps.link records from the ingress-nginx Service
+# (deployed by sedemo-platform). Only the AWS side lives here.
+#
+resource "aws_iam_policy" "irsa_policy_external_dns" {
+  name        = "${var.primary_cluster_name}-irsa-policy-external-dns"
+  description = "Policy allowing external-dns to manage records in the demo domain zone."
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["route53:ChangeResourceRecordSets"]
+        Resource = [data.aws_route53_zone.root_demo_domain_zone.arn]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "route53:ListHostedZones",
+          "route53:ListResourceRecordSets",
+          "route53:ListTagsForResources",
+        ]
+        Resource = ["*"]
+      },
+    ]
+  })
+
+  tags = var.common_tags
+}
+
+resource "aws_iam_role" "external_dns" {
+  name = "${var.primary_cluster_name}-irsa-role-external-dns"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = module.eks.oidc_provider_arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${module.eks.oidc_provider}:aud" = "sts.amazonaws.com"
+            "${module.eks.oidc_provider}:sub" = "system:serviceaccount:external-dns:external-dns"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = var.common_tags
+}
+
+resource "aws_iam_role_policy_attachment" "external_dns" {
+  role       = aws_iam_role.external_dns.name
+  policy_arn = aws_iam_policy.irsa_policy_external_dns.arn
 }

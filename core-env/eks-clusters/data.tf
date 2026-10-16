@@ -8,27 +8,8 @@ data "terraform_remote_state" "arad_aws_state" {
   }
 }
 
-data "kubernetes_service_v1" "nginx_ingress" {
-  metadata {
-    name      = "ingress-nginx-controller"
-    namespace = var.ingress_namespace
-  }
-
-  depends_on = [
-    helm_release.nginx_ingress
-  ]
-}
-
 data "aws_region" "current" {}
 
 data "aws_availability_zones" "available" {}
 
 data "aws_caller_identity" "current" {}
-
-data "aws_secretsmanager_secret_version" "twingate" {
-  secret_id = var.twingate_secret_arn
-}
-
-locals {
-  twingate_secret = jsondecode(data.aws_secretsmanager_secret_version.twingate.secret_string)
-}
