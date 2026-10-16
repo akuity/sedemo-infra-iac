@@ -175,17 +175,6 @@ data "aws_route53_zone" "root_demo_domain_zone" {
   name = var.root_domain_name
 }
 
-# ingress-nginx and its Route53 records moved to sedemo-platform (Argo CD +
-# external-dns, sedemo-platform#184) so this module never needs the cluster API.
-# Forget the release instead of uninstalling it: Argo CD adopts the running
-# controller and its ELB. The two records are deleted; external-dns recreates them.
-removed {
-  from = helm_release.nginx_ingress
-  lifecycle {
-    destroy = false
-  }
-}
-
 #
 # ESO - External Secrets Operator
 #. Creates a policy with access to secrets,
@@ -270,17 +259,6 @@ resource "aws_iam_role_policy_attachment" "irsa_secrets" {
 
 
 # arn:aws:sts::218691292270:assumed-role/default-eks-node-group-20251111192150921200000002/i-0121fb11f5ec3bd40
-
-#
-# Twingate connector moved to sedemo-platform (Argo CD, tokens via ESO). Forget
-# the release instead of uninstalling it so the connector keeps running.
-#
-removed {
-  from = helm_release.twingate_connector
-  lifecycle {
-    destroy = false
-  }
-}
 
 #
 # external-dns: manages akpdemoapps.link records from the ingress-nginx Service
