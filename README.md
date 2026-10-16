@@ -30,7 +30,7 @@ If you hit this error, run `tofu init` instead (check any `tf` shell alias too).
 
 - `core-env` this folder contains 2 modules:
   - `aws` provisions base AWS resources including IAM roles used by the pipeline and operators. and domain used by deployed apps.  Customers will most likely already have solutions for this base layer.
-  - `eks-clusters` provisions a VPC and small EKS cluster to host sample applications and Akuity local agents, plus the IAM roles its in-cluster components use (External Secrets, external-dns). It only uses AWS APIs and never talks to the cluster. `ingress-nginx`, the Twingate connector and external-dns are deployed by Argo CD from [sedemo-platform](https://github.com/akuity/sedemo-platform) (`components/declarations/ingress/`).
+  - `eks-clusters` provisions a VPC and small EKS cluster to host sample applications and Akuity local agents, plus the IAM roles its in-cluster components use (External Secrets, external-dns). It only uses AWS APIs and never talks to the cluster. `ingress-nginx`, the Twingate connector and external-dns are deployed by Argo CD from [sedemo-platform](https://github.com/akuity/sedemo-platform) (`components/declarations/twingate`, `ingress-nginx`, `external-dns`).
 - `akuity-bootstrap` requires an existing Akuity Org and API key with admin rights. See [`akuity-bootstrap/README.md`](akuity-bootstrap/README.md) for full details. The terraform module will:
   - provision an AKP instance (Enterprise ArgoCD) with Akuity Intelligence & AI Powered Runbooks enabled
   - provision an Enterprise Kargo instance with Microsoft OIDC
@@ -62,7 +62,7 @@ A new cluster's API is only reachable through Twingate once Argo CD has synced t
 
 1. In a PR, set the `eks_endpoint_public_access` default to `true` in `core-env/eks-clusters/variables.tf`, and merge it to create the cluster. When applying locally, pass `-var eks_endpoint_public_access=true` instead.
 2. Apply `akuity-bootstrap` (registers the cluster and installs the agent) and `argocd-bootstrap` (`akuity-iac-main`). If the External Secrets IRSA role ARN changed, update `secrets/irsa-serviceaccount.yaml` in sedemo-platform. The external-dns role name is stable.
-3. In Argo CD, sync `app-of-components` and the component apps: `external-secrets`, `eso-secret-store-kargo`, `twingate-connector`, `ingress-nginx`, `external-dns`.
+3. In Argo CD, sync `app-of-components` and the component apps: `external-secrets`, then `eso-secret-store-kargo` (it creates the connector's token Secret), then `twingate-connector`, `ingress-nginx` and `external-dns`. If `eso-secret-store-kargo` fails because the `twingate` namespace doesn't exist yet, re-sync it after `twingate-connector` creates the namespace.
 4. Update the Twingate Resource address to the new endpoint hostname (`tofu output primary_cluster_endpoint`, without `https://`). The hostname embeds the cluster ID, so it changes on every recreate.
 5. Check that the connector shows as connected in the Twingate admin console, that `kubectl get ns` works over Twingate, and that `akpdemoapps.link` resolves to the new ingress ELB.
 6. Revert the default to `false` in a PR and merge. Changing endpoint access takes several minutes.
