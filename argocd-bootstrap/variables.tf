@@ -106,6 +106,18 @@ variable "project_spaces" {
         kind  = "*"
       }]
     }
+    "governed-apps" = {
+      "name"        = "governed-apps"
+      "description" = "Governed tenants (governed-teams)"
+      "destinations" = [{
+        name      = "*"
+        namespace = "*"
+      }]
+      "cluster-allows" = [{
+        group = "*"
+        kind  = "*"
+      }]
+    }
     "akuity-lab" = {
       "name"        = "akuity-lab"
       "description" = "Akuity Lab applications"
