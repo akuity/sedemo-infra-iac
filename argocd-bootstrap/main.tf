@@ -139,32 +139,3 @@ resource "argocd_application" "governed-apps" {
   }
   depends_on = [argocd_project.projects]
 }
-
-
-resource "argocd_application" "akuity-lab" {
-  metadata {
-    name      = "akuity-lab"
-    namespace = "argocd"
-    labels = {
-      cluster = "in-cluster"
-    }
-  }
-
-  spec {
-    destination {
-      name = "in-cluster"
-    }
-    project = "akuity-lab"
-
-    source {
-      repo_url = var.source_repo_url
-      path     = "akuity-lab"
-      directory {
-        recurse = false
-      }
-    }
-  }
-  depends_on = [argocd_project.projects]
-}
-
-
