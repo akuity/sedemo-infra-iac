@@ -30,18 +30,18 @@ variable "kargo_instance_name" {
 variable "kargo_instance_version" {
   description = "The version of the Kargo instance to create or update."
   type        = string
-  default     = "v1.12.1-ak.0"
+  default     = "v1.12.5-ak.1"
 }
 variable "kargo_agent_version" {
   description = "The version of the Kargo agent to create or update."
   type        = string
-  default     = "0.5.88"
+  default     = "0.5.104"
 }
 
 variable "kargo_unstable_version" {
   description = "The version of the Kargo instance to create or update."
   type        = string
-  default     = "v1.13.0-unstable-20260928"
+  default     = "v1.13.0-rc.5"
 }
 
 variable "kargo_agent_size" {
