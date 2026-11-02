@@ -113,6 +113,7 @@ resource "argocd_application" "templated-apps" {
   depends_on = [argocd_project.projects]
 }
 
+#for governed-teams bootstrap
 resource "argocd_application" "governed-apps" {
   metadata {
     name      = "governed-apps"
