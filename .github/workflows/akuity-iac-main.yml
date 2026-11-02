@@ -69,7 +69,7 @@ jobs:
 
   app_of_apps:
     needs: [changes, akuity_setup]
-    if: needs.changes.outputs.argocd == 'true' && (needs.akuity_setup.result == 'success' || needs.akuity_setup.result == 'skipped')
+    if: ${{ !cancelled() && needs.changes.outputs.argocd == 'true' && (needs.akuity_setup.result == 'success' || needs.akuity_setup.result == 'skipped') }}
     defaults:
       run:
         working-directory: argocd-bootstrap
