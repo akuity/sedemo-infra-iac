@@ -32,96 +32,106 @@ resource "akp_instance" "se-demo-iac" {
           ai_support_engineer_enabled = true
         }
 
-        ai_config = {
-          # ArgoCD Slack service name for notifications (must match your argocd-notifications-cm config)
-          #argocd_slack_service = "argo-notifications"
-          # AI Runbooks - Automated troubleshooting guides that can be triggered by incidents
-          # Each runbook should contain step-by-step instructions for resolving common issues
-          # The AI can automatically execute or suggest these runbooks when incidents occur
-          runbooks = [
-            {
-              name    = "oom"
-              content = <<-EOF
-                # OOM-Killed Runbook
-
-                ## Procedure
-
-                Follow these steps precisely.
-
-                ### Triage the Incident
-                - First, do the initial triage and collect the basic information to understand the incident.
-                - Next, send a single Slack notification with the link to the conversation to channel "#incidents" and a formatted summary of the incident details. 
-
-                ### Plan Remediation
-                - Next, devise a plan to remediate the incident according to the runbook actions defined. Don't apply any patches automatically.
-                - Send a single Slack notification with your findings and planned remediation. Ask for approval before proceeding.
-                - "After summarizing findings, always send the proposed remediation and approval prompt to the same Slack thread where triage notification was posted."
-
-                ### Take Action
-                - Once approval is provided, proceed applying the planned remediation.
-                - Monitor the result of your remediation.
-
-                ### Resolve Incident
-                - If the app is stable, then you can close the incident automatically. You do not need confirmtation to close the incident.
-
-                ## General Guidance
-
-                - If you get stuck, send a Slack message again and mention that you need help.
-                - Please ensure you send Slack message with the link to the conversation, so engineer can work with you together if needed.
-                - You do not need to include every thought when sending to slack, only send summaries or when prompting for user action. 
-                - "After summarizing findings, always send the proposed remediation and approval prompt to the same Slack thread where triage notification was posted.This should be it's own message to ensure prompt user attention."
-
-                ## Action: Out of memory
-
-                **Symptoms**: 
-                - Pod unexpectedly dies with \`OOMKilled\` status.
-                - Pod stuck in CrashLoopBackOff status
-                - Frequent OOM kills (Out of Memory) in logs
-                - Deployment or pod status "Degraded", "Exceeded progress deadline"
-
-                **Root cause**: The pod is consuming more memory than the available memory.
-
-                **Solution**:
-
-                * Temporary increase the memory limit of the pod automatically
-                * Increase the memory limit with the 50 Mb increment until the pod is stable.
-                * Once stable, resolve the incident
-              EOF
-              applied_to = {
-                argocd_applications = ["oom-*"]
-                k8s_namespaces      = ["*"]
-                clusters            = ["*r"]
-              }
-            }
-          ]
-
-          # Incident Management Configuration
-          # Defines when to trigger incidents and how to notify external systems
-          incidents = {
-            # Incident triggers - Define conditions that automatically create incidents
-            # When these conditions are met, AI runbooks can be automatically executed
-            triggers = [
+        # Akuity Intelligence configuration. NOTE: the provider only reads this
+        # under kube_vision_config; an ai_config block directly under
+        # instance_spec is silently ignored. Runbook content lives in ./runbooks.
+        kube_vision_config = {
+          cve_scan_config = {
+            scan_enabled    = true
+            rescan_interval = "168h"
+          }
+          ai_config = {
+            argocd_slack_channels = ["incidents"]
+            runbooks = [
               {
-                argocd_applications = ["oom-dev"]
-                k8s_namespaces      = ["*"]
-
+                name                = "pod-oom"
+                content             = file("${path.module}/runbooks/pod-oom.md")
+                slack_channel_names = ["incidents"]
+                applied_to = {
+                  argocd_applications = ["demo-intelligence-prod-oom"]
+                  k8s_namespaces      = ["*"]
+                  clusters            = ["*"]
+                }
+              },
+              {
+                name                = "pod-health-issues"
+                content             = file("${path.module}/runbooks/pod-health-issues.md")
+                slack_channel_names = ["incidents"]
+              },
+              {
+                name    = "argocd-app-degraded"
+                content = file("${path.module}/runbooks/argocd-app-degraded.md")
+              },
+              {
+                name    = "argocd-app-out-of-sync"
+                content = file("${path.module}/runbooks/argocd-app-out-of-sync.md")
+              },
+              {
+                name    = "argocd-app-sync-failure"
+                content = file("${path.module}/runbooks/argocd-app-sync-failure.md")
+              },
+              {
+                name    = "pod-pending-scheduling"
+                content = file("${path.module}/runbooks/pod-pending-scheduling.md")
+              },
+              {
+                name    = "pvc-binding-failure"
+                content = file("${path.module}/runbooks/pvc-binding-failure.md")
+              },
+              {
+                name    = "time-drift"
+                content = file("${path.module}/runbooks/time-drift.md")
+              },
+              {
+                name    = "cni-networking"
+                content = file("${path.module}/runbooks/cni-networking.md")
+              },
+              {
+                name    = "service-connectivity"
+                content = file("${path.module}/runbooks/service-connectivity.md")
+              },
+              {
+                name    = "image-pull-failure"
+                content = file("${path.module}/runbooks/image-pull-failure.md")
+              },
+              {
+                name    = "pod-evictions"
+                content = file("${path.module}/runbooks/pod-evictions.md")
+              },
+              {
+                name    = "rbac-denials"
+                content = file("${path.module}/runbooks/rbac-denials.md")
               }
             ]
-
-            # Webhook configurations for incident notifications
-            # Define how to notify external systems (PagerDuty, Slack, Teams, etc.) when incidents occur
-            # Each webhook specifies JSON paths to extract relevant information from the incident payload
-            # webhooks = [
-            #   {
-            #     name                         = "slack-alert"
-            #     description_path             = "{.body.alerts[0].annotations.description}"
-            #     cluster_path                 = "{.query.clusterName}"
-            #     k8s_namespace_path           = "{.body.alerts[0].labels.namespace}"
-            #     argocd_application_name_path = ""
-            #   }
-            # ]
+            incidents = {
+              triggers = [
+                {
+                  argocd_applications = ["*"]
+                  k8s_namespaces      = ["demo-intelligence"]
+                  clusters            = ["sedemo-primary"]
+                }
+              ]
+              # Explicitly empty: incidents are created per Argo CD application, so
+              # the OOM and crashloop demos in demo-intelligence stay independent.
+              # (Omitting grouping keeps whatever is set on the server.)
+              grouping = {
+                k8s_namespaces           = []
+                argocd_application_names = []
+              }
+              investigation_approval = {
+                scopes = [
+                  {
+                    argocd_applications       = ["*"]
+                    k8s_namespaces            = ["*"]
+                    clusters                  = ["*"]
+                    consecutive_auto_closures = 1
+                  }
+                ]
+              }
+            }
           }
         }
+
         // Control plane metrics
         metrics_ingress_username      = "user"
         metrics_ingress_password_hash = "passwordhash"
