@@ -51,18 +51,31 @@ resource "akp_instance" "se-demo-iac" {
           }
           ai_config = {
             argocd_slack_channels = ["incidents"]
-            runbooks = [
+            # Demo runbooks are synced from Git: edit them in akuity/sedemo-platform under
+            # apps/demo-intelligence/runbooks/ (file name = runbook name). The runbooks
+            # list below holds the general-purpose ones.
+            runbook_repos = [
               {
-                name                = "pod-oom"
-                content             = file("${path.module}/runbooks/pod-oom.md")
-                slack_channel_names = ["incidents"]
-                applied_to = {
-                  argocd_applications = ["demo-intelligence-prod-oom"]
-                  k8s_namespaces      = ["*"]
-                  clusters            = ["*"]
-                  degraded_for        = ""
+                repo_url = "https://github.com/akuity/sedemo-platform"
+                revision = "main"
+                path     = "apps/demo-intelligence/runbooks"
+                applied_for = {
+                  "pod-oom" = {
+                    argocd_applications = ["demo-intelligence-prod-oom"]
+                    k8s_namespaces      = ["*"]
+                    clusters            = ["*"]
+                    degraded_for        = ""
+                  }
+                  "pod-crashloop" = {
+                    argocd_applications = ["demo-intelligence-prod-crashloop"]
+                    k8s_namespaces      = ["*"]
+                    clusters            = ["*"]
+                    degraded_for        = ""
+                  }
                 }
-              },
+              }
+            ]
+            runbooks = [
               {
                 name                = "pod-health-issues"
                 content             = file("${path.module}/runbooks/pod-health-issues.md")
@@ -111,17 +124,6 @@ resource "akp_instance" "se-demo-iac" {
               {
                 name    = "rbac-denials"
                 content = file("${path.module}/runbooks/rbac-denials.md")
-              },
-              {
-                name                = "pod-crashloop"
-                content             = file("${path.module}/runbooks/pod-crashloop.md")
-                slack_channel_names = ["incidents"]
-                applied_to = {
-                  argocd_applications = ["demo-intelligence-prod-crashloop"]
-                  k8s_namespaces      = ["*"]
-                  clusters            = ["*"]
-                  degraded_for        = ""
-                }
               }
             ]
             incidents = {
