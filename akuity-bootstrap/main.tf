@@ -107,14 +107,25 @@ resource "akp_instance" "se-demo-iac" {
               {
                 name    = "rbac-denials"
                 content = file("${path.module}/runbooks/rbac-denials.md")
+              },
+              {
+                name                = "pod-crashloop"
+                content             = file("${path.module}/runbooks/pod-crashloop.md")
+                slack_channel_names = ["incidents"]
+                applied_to = {
+                  argocd_applications = ["demo-intelligence-prod-crashloop"]
+                  k8s_namespaces      = ["*"]
+                  clusters            = ["*"]
+                }
               }
             ]
             incidents = {
               triggers = [
                 {
-                  argocd_applications = ["*"]
-                  k8s_namespaces      = ["demo-intelligence"]
-                  clusters            = ["sedemo-primary"]
+                  # Scoped by app name: an argocd_applications of "*" matched every
+                  # Degraded app on the instance regardless of k8s_namespaces.
+                  argocd_applications = ["demo-intelligence-*"]
+                  clusters            = ["*"]
                 }
               ]
               # Explicitly empty: incidents are created per Argo CD application, so
