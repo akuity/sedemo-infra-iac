@@ -32,15 +32,18 @@ resource "akp_instance" "se-demo-iac" {
           ai_support_engineer_enabled = true
         }
 
-        # Akuity Intelligence (AI SRE) configuration, mirrored from the live
-        # instance. The provider only reads this under kube_vision_config; an
-        # ai_config block directly under instance_spec is silently ignored.
+        # Akuity Intelligence (AI SRE) configuration: runbooks, incident triggers,
+        # grouping and investigation approval. Managed here; make changes in this
+        # file, not in the Akuity UI (the next apply overwrites UI edits).
         # Runbook content lives in ./runbooks.
         #
-        # KNOWN PROVIDER ISSUE (akp 0.10.1-rc.1 and 0.18.0): for an existing
-        # instance the plan always proposes the server's current value for this
-        # whole block, so edits here are NOT applied. Make changes in the Akuity
-        # UI, then mirror them here to keep this file accurate.
+        # - The provider only reads this under kube_vision_config; an ai_config
+        #   block directly under instance_spec is silently ignored.
+        # - Do not add kube_vision_config to lifecycle.ignore_changes: Terraform
+        #   would then send the provider's partial state copy on every apply, which
+        #   reset the trigger and investigation approval set in the UI.
+        # - Set list/string fields explicitly ([] / "") where the API returns them,
+        #   so the plan matches what the API reads back after apply.
         kube_vision_config = {
           cve_scan_config = {
             scan_enabled    = true
@@ -57,6 +60,7 @@ resource "akp_instance" "se-demo-iac" {
                   argocd_applications = ["demo-intelligence-prod-oom"]
                   k8s_namespaces      = ["*"]
                   clusters            = ["*"]
+                  degraded_for        = ""
                 }
               },
               {
@@ -116,6 +120,7 @@ resource "akp_instance" "se-demo-iac" {
                   argocd_applications = ["demo-intelligence-prod-crashloop"]
                   k8s_namespaces      = ["*"]
                   clusters            = ["*"]
+                  degraded_for        = ""
                 }
               }
             ]
@@ -125,7 +130,9 @@ resource "akp_instance" "se-demo-iac" {
                   # Scoped by app name: an argocd_applications of "*" matched every
                   # Degraded app on the instance regardless of k8s_namespaces.
                   argocd_applications = ["demo-intelligence-*"]
+                  k8s_namespaces      = []
                   clusters            = ["*"]
+                  degraded_for        = ""
                 }
               ]
               # Explicitly empty: incidents are created per Argo CD application, so
@@ -219,7 +226,6 @@ resource "akp_instance" "se-demo-iac" {
   lifecycle {
     ignore_changes = [
       argocd.spec.version,
-      argocd.spec.instance_spec.kube_vision_config,
       argocd_secret
     ]
   }
