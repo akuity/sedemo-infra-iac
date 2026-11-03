@@ -32,9 +32,15 @@ resource "akp_instance" "se-demo-iac" {
           ai_support_engineer_enabled = true
         }
 
-        # Akuity Intelligence configuration. NOTE: the provider only reads this
-        # under kube_vision_config; an ai_config block directly under
-        # instance_spec is silently ignored. Runbook content lives in ./runbooks.
+        # Akuity Intelligence (AI SRE) configuration, mirrored from the live
+        # instance. The provider only reads this under kube_vision_config; an
+        # ai_config block directly under instance_spec is silently ignored.
+        # Runbook content lives in ./runbooks.
+        #
+        # KNOWN PROVIDER ISSUE (akp 0.10.1-rc.1 and 0.18.0): for an existing
+        # instance the plan always proposes the server's current value for this
+        # whole block, so edits here are NOT applied. Make changes in the Akuity
+        # UI, then mirror them here to keep this file accurate.
         kube_vision_config = {
           cve_scan_config = {
             scan_enabled    = true
@@ -158,6 +164,24 @@ resource "akp_instance" "se-demo-iac" {
           redirectURI: https://${local.argo_custom_url}/api/dex/callback
           tenant: ${var.MS_OAUTH_TENANT_ID}
       EOF
+    # Settings below were added outside Terraform (UI/API) and are captured
+    # here so applies stop deleting them.
+    "accounts.admin.enabled"                                         = "true"
+    "accounts.finops"                                                = "apiKey,login"
+    "accounts.finops.enabled"                                        = "true"
+    "accounts.github-actions.enabled"                                = "true"
+    "exec.enabled"                                                   = "false"
+    "ga.anonymizeusers"                                              = "false"
+    "helm.enabled"                                                   = "true"
+    "kustomize.enabled"                                              = "true"
+    "resource.customizations.actions.argoproj.io_ApplicationSet"     = chomp(file("${path.module}/argocd-cm/applicationset-refresh-action.yaml"))
+    "resource.customizations.health.argoproj.io_Application"         = chomp(file("${path.module}/argocd-cm/application-health.lua"))
+    "resource.customizations.useOpenLibs.argoproj.io_Application"    = "false"
+    "resource.customizations.useOpenLibs.argoproj.io_ApplicationSet" = "false"
+    "server.rbac.log.enforce.enable"                                 = "false"
+    "statusbadge.enabled"                                            = "false"
+    "ui.bannerpermanent"                                             = "false"
+    "users.anonymous.enabled"                                        = "false"
   }
   argocd_rbac_cm = {
     "policy.csv" = <<-EOF
