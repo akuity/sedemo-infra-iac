@@ -1,0 +1,13 @@
+discovery.lua: |
+  actions = {}
+  actions["refresh"] = {}
+  return actions
+definitions:
+  - name: refresh
+    action.lua: |
+      local os = require("os")
+      if obj.metadata.annotations == nil then
+          obj.metadata.annotations = {}
+      end
+      obj.metadata.annotations["akuity.io/refreshedAt"] = os.date("!%Y-%m-%dT%XZ")
+      return obj
