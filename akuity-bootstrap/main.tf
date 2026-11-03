@@ -35,7 +35,7 @@ resource "akp_instance" "se-demo-iac" {
         # Akuity Intelligence (AI SRE) configuration: runbooks, incident triggers,
         # grouping and investigation approval. Managed here; make changes in this
         # file, not in the Akuity UI (the next apply overwrites UI edits).
-        # Runbook content lives in ./runbooks.
+        # Runbook content lives in akuity/sedemo-platform (see runbook_repos).
         #
         # - The provider only reads this under kube_vision_config; an ai_config
         #   block directly under instance_spec is silently ignored.
@@ -51,14 +51,15 @@ resource "akp_instance" "se-demo-iac" {
           }
           ai_config = {
             argocd_slack_channels = ["incidents"]
-            # Demo runbooks are synced from Git: edit them in akuity/sedemo-platform under
-            # apps/demo-intelligence/runbooks/ (file name = runbook name). The runbooks
-            # list below holds the general-purpose ones.
+            # All runbooks are synced from Git: akuity/sedemo-platform, top-level
+            # runbooks/ folder (file name = runbook name, subfolders are categories).
+            # Edit them there, not here or in the Akuity UI. applied_for scopes
+            # app-specific runbooks; runbooks without an entry apply to every incident.
             runbook_repos = [
               {
                 repo_url = "https://github.com/akuity/sedemo-platform"
                 revision = "main"
-                path     = "apps/demo-intelligence/runbooks"
+                path     = "runbooks"
                 applied_for = {
                   "pod-oom" = {
                     argocd_applications = ["demo-intelligence-prod-oom"]
@@ -75,57 +76,7 @@ resource "akp_instance" "se-demo-iac" {
                 }
               }
             ]
-            runbooks = [
-              {
-                name                = "pod-health-issues"
-                content             = file("${path.module}/runbooks/pod-health-issues.md")
-                slack_channel_names = ["incidents"]
-              },
-              {
-                name    = "argocd-app-degraded"
-                content = file("${path.module}/runbooks/argocd-app-degraded.md")
-              },
-              {
-                name    = "argocd-app-out-of-sync"
-                content = file("${path.module}/runbooks/argocd-app-out-of-sync.md")
-              },
-              {
-                name    = "argocd-app-sync-failure"
-                content = file("${path.module}/runbooks/argocd-app-sync-failure.md")
-              },
-              {
-                name    = "pod-pending-scheduling"
-                content = file("${path.module}/runbooks/pod-pending-scheduling.md")
-              },
-              {
-                name    = "pvc-binding-failure"
-                content = file("${path.module}/runbooks/pvc-binding-failure.md")
-              },
-              {
-                name    = "time-drift"
-                content = file("${path.module}/runbooks/time-drift.md")
-              },
-              {
-                name    = "cni-networking"
-                content = file("${path.module}/runbooks/cni-networking.md")
-              },
-              {
-                name    = "service-connectivity"
-                content = file("${path.module}/runbooks/service-connectivity.md")
-              },
-              {
-                name    = "image-pull-failure"
-                content = file("${path.module}/runbooks/image-pull-failure.md")
-              },
-              {
-                name    = "pod-evictions"
-                content = file("${path.module}/runbooks/pod-evictions.md")
-              },
-              {
-                name    = "rbac-denials"
-                content = file("${path.module}/runbooks/rbac-denials.md")
-              }
-            ]
+            runbooks = []
             incidents = {
               triggers = [
                 {
