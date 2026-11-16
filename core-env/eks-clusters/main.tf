@@ -84,6 +84,23 @@ module "eks" {
   }
 
   tags = var.common_tags
+
+  # The module's default node rules only allow node-to-node traffic on 1025-65535
+  # and 53. kube-proxy forwards NodePort and Service traffic to pods on other
+  # nodes, and pods there may listen on ports below 1025 (ingress-nginx on
+  # 80/443). Without this rule, the ELB health checks fail on every node that
+  # doesn't run the controller pod.
+  node_security_group_additional_rules = {
+    ingress_self_all = {
+      description = "Node to node all ports/protocols"
+      protocol    = "-1"
+      from_port   = 0
+      to_port     = 0
+      type        = "ingress"
+      self        = true
+    }
+  }
+
   eks_managed_node_groups = {
     default = {
       #ami_type = "AL2023_ARM_64_STANDARD"
