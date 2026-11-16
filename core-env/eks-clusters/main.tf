@@ -5,14 +5,16 @@ module "vpc" {
   name = "${var.primary_cluster_name}-vpc"
   cidr = "10.0.0.0/16"
   azs  = formatlist("${data.aws_region.current.region}%s", ["a", "b"])
-  # Nodes live in the private subnets and reach the internet through NAT
-  # (sedemo-platform#121). The public subnets only hold the NAT gateway and
-  # internet-facing load balancers.
+  # Nodes live in the private subnets and reach the internet through the
+  # fck-nat instance below (sedemo-platform#121). The public subnets only hold
+  # the NAT instance and internet-facing load balancers.
   private_subnets = ["10.0.64.0/19", "10.0.96.0/19"]
   public_subnets  = ["10.0.0.0/19", "10.0.32.0/19"]
-  # One NAT gateway is enough for a demo environment. If its AZ fails, nodes in
-  # the other AZ lose egress until it recovers.
-  enable_nat_gateway      = true
+  # No managed NAT gateway: module.fck_nat handles egress instead.
+  # single_nat_gateway still matters, because it makes the module create one
+  # private route table shared by both AZs, which module.fck_nat points at the
+  # NAT instance.
+  enable_nat_gateway      = false
   single_nat_gateway      = true
   enable_dns_hostnames    = true
   map_public_ip_on_launch = false
@@ -32,6 +34,47 @@ module "vpc" {
     "kubernetes.io/cluster/${var.primary_cluster_name}" = "shared"
     "kubernetes.io/role/internal-elb"                   = "1"
   }
+}
+
+# Egress NAT for the private subnets: an fck-nat instance (https://fck-nat.dev)
+# instead of a managed NAT gateway. It costs about $74/yr (t4g.micro) with no
+# per-GB processing charge, against about $394/yr plus $0.045/GB for a NAT
+# gateway.
+#
+# Trade-offs:
+# - The AMI comes from the fck-nat project's AWS account (568608671756). The
+#   module picks the most recent one when the launch template is created or
+#   refreshed. Security patches arrive through dnf auto-update on the instance.
+# - In HA mode the instance runs in an Auto Scaling group of one. A
+#   replacement reattaches the same private ENI (the route target) and the EIP
+#   below, but egress is down for about 5 minutes while it boots.
+#
+# Nodes need this route before they launch. On a fresh apply, run
+# `tofu apply -target=module.vpc -target=module.fck_nat` first.
+resource "aws_eip" "nat" {
+  domain = "vpc"
+  tags   = merge(var.common_tags, { Name = "${var.primary_cluster_name}-nat" })
+}
+
+module "fck_nat" {
+  source  = "RaJiska/fck-nat/aws"
+  version = "~> 1.6.1"
+
+  name          = "${var.primary_cluster_name}-nat"
+  vpc_id        = module.vpc.vpc_id
+  subnet_id     = module.vpc.public_subnets[0]
+  instance_type = "t4g.micro"
+  ha_mode       = true
+
+  # Stable egress IP for allowlists, kept across instance replacements.
+  eip_allocation_ids = [aws_eip.nat.allocation_id]
+
+  update_route_tables = true
+  route_tables_ids = {
+    private = module.vpc.private_route_table_ids[0]
+  }
+
+  tags = var.common_tags
 }
 
 

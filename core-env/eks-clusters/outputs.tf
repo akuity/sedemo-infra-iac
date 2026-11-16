@@ -28,3 +28,9 @@ output "external_dns_role_arn" {
   # referenced by the external-dns ServiceAccount in sedemo-platform
   value = aws_iam_role.external_dns.arn
 }
+
+output "nat_egress_ip" {
+  # The cluster's outbound address. Anything that allowlists the cluster's
+  # egress needs this IP.
+  value = aws_eip.nat.public_ip
+}
