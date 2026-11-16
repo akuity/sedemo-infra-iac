@@ -5,13 +5,17 @@ module "vpc" {
   name = "${var.primary_cluster_name}-vpc"
   cidr = "10.0.0.0/16"
   azs  = formatlist("${data.aws_region.current.region}%s", ["a", "b"])
-  #private_subnets      = ["10.0.1.0/24", "10.0.2.0/24"]
-  public_subnets = ["10.0.0.0/19", "10.0.32.0/19"]
-  #public_subnet_assign_
-  #enable_nat_gateway = true
-  #single_nat_gateway = true
+  # Nodes live in the private subnets and reach the internet through NAT
+  # (sedemo-platform#121). The public subnets only hold the NAT gateway and
+  # internet-facing load balancers.
+  private_subnets = ["10.0.64.0/19", "10.0.96.0/19"]
+  public_subnets  = ["10.0.0.0/19", "10.0.32.0/19"]
+  # One NAT gateway is enough for a demo environment. If its AZ fails, nodes in
+  # the other AZ lose egress until it recovers.
+  enable_nat_gateway      = true
+  single_nat_gateway      = true
   enable_dns_hostnames    = true
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
 
   #enable_ipv6 = true
 
@@ -40,10 +44,11 @@ module "eks" {
   # See https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html
   kubernetes_version = 1.36
 
-  vpc_id                  = module.vpc.vpc_id
-  subnet_ids              = module.vpc.public_subnets
-  endpoint_public_access  = var.eks_endpoint_public_access
-  endpoint_private_access = true
+  vpc_id                   = module.vpc.vpc_id
+  subnet_ids               = module.vpc.private_subnets
+  control_plane_subnet_ids = module.vpc.private_subnets
+  endpoint_public_access   = var.eks_endpoint_public_access
+  endpoint_private_access  = true
 
   # use pod-identity OR irsa, not both
   enable_irsa = true
@@ -79,6 +84,23 @@ module "eks" {
   }
 
   tags = var.common_tags
+
+  # The module's default node rules only allow node-to-node traffic on 1025-65535
+  # and 53. kube-proxy forwards NodePort and Service traffic to pods on other
+  # nodes, and pods there may listen on ports below 1025 (ingress-nginx on
+  # 80/443). Without this rule, the ELB health checks fail on every node that
+  # doesn't run the controller pod.
+  node_security_group_additional_rules = {
+    ingress_self_all = {
+      description = "Node to node all ports/protocols"
+      protocol    = "-1"
+      from_port   = 0
+      to_port     = 0
+      type        = "ingress"
+      self        = true
+    }
+  }
+
   eks_managed_node_groups = {
     default = {
       #ami_type = "AL2023_ARM_64_STANDARD"

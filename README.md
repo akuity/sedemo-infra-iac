@@ -54,6 +54,8 @@ The `sedemo-primary` API endpoint is private (`eks_endpoint_public_access = fals
 
 To use `kubectl`, connect the Twingate client with an account that has access to that Resource.
 
+The nodes and the control-plane ENIs sit in the private subnets (`10.0.64.0/19`, `10.0.96.0/19`) and have no public IPs. Their outbound traffic leaves through a single NAT gateway, so anything that allowlists the cluster's egress needs that gateway's Elastic IP (`aws ec2 describe-nat-gateways`). The public subnets only hold the NAT gateway and internet-facing load balancers. Internal load balancers go in the private subnets (tagged `kubernetes.io/role/internal-elb`).
+
 CI doesn't need Twingate. `core-env/eks-clusters` only calls AWS APIs. `akuity-bootstrap` only touches the cluster when `akp_cluster` is first created, to install the agent, and that happens during the bootstrap window below. `argocd-bootstrap` only talks to the Argo CD API.
 
 ### Bootstrapping a fresh cluster
